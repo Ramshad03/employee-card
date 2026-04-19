@@ -1,3 +1,22 @@
 {
-  "employees": []
+  "employees": [
+    {
+      "id": "1776587644512",
+      "name": "dSA",
+      "role": "aDS",
+      "email": "DSA@gmail.com",
+      "phone": "asd",
+      "department": "safd",
+      "customFields": []
+    },
+    {
+      "id": "1776588103232",
+      "name": "eafwa",
+      "role": "efa",
+      "email": "fds@gmail.com",
+      "phone": "fasd",
+      "department": "afs",
+      "customFields": []
+    }
+  ]
 }
