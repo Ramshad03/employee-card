@@ -9,15 +9,14 @@ const DATA_FILE = path.join(__dirname, 'employees.json');
 
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
+app.use(express.static(path.join(__dirname, '../frontend')));
 
 app.get('/', (req, res) => {
   res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
   res.setHeader('Pragma', 'no-cache');
   res.setHeader('Expires', '0');
-  res.sendFile(path.join(__dirname, '../frontend/index.html'));
+  res.sendFile(path.join(__dirname, '../frontend/employees.html'));
 });
-
-app.use(express.static(path.join(__dirname, '../frontend')));
 
 // Helper: read employees
 function readEmployees() {
@@ -33,14 +32,10 @@ function writeEmployees(employees) {
 // POST upload photo - store as base64
 app.post('/api/upload', (req, res) => {
   try {
-    console.log('Upload request received');
     const { image } = req.body;
     if (!image) return res.status(400).json({ error: 'No image provided' });
-    console.log('Image received, length:', image.length);
-    // Return base64 directly as the photo URL
     res.json({ photoUrl: image });
   } catch (err) {
-    console.error('Upload error:', err.message);
     res.status(500).json({ error: err.message });
   }
 });
@@ -82,9 +77,17 @@ app.delete('/api/employees/:id', (req, res) => {
 app.get('/api/employees/export', (req, res) => {
   const employees = readEmployees();
   const headers = ['id', 'name', 'role', 'email', 'phone', 'department'];
-  const rows = employees.map(e =>
-    headers.map(h => `"${(e[h] || '').replace(/"/g, '""')}"`).join(',')
-  );
+  const rows = employees.map(e => {
+    const values = [
+      e.employeeId || '',
+      e.name || '',
+      e.role || '',
+      e.email || '',
+      e.phone || '',
+      e.department || ''
+    ];
+    return values.map(v => `"${v.toString().replace(/"/g, '""')}"`).join(',');
+  });
   const csv = [headers.join(','), ...rows].join('\n');
   res.setHeader('Content-Type', 'text/csv');
   res.setHeader('Content-Disposition', 'attachment; filename=employees.csv');

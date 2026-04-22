@@ -9,6 +9,9 @@
 body {
   background-color: #f4f6f9;
   color: #333;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
 /* ===== NAVBAR ===== */
@@ -47,62 +50,6 @@ body {
   color: #e94560;
 }
 
-/* ===== HERO SECTION ===== */
-.hero {
-  background: linear-gradient(135deg, #1a1a2e, #16213e);
-  color: #fff;
-  padding: 100px 40px;
-  text-align: center;
-}
-
-.hero h1 {
-  font-size: 2.5rem;
-  margin-bottom: 20px;
-}
-
-.hero p {
-  font-size: 1.1rem;
-  color: #ccc;
-  margin-bottom: 30px;
-}
-
-/* ===== FEATURES SECTION ===== */
-.features {
-  display: flex;
-  justify-content: center;
-  gap: 30px;
-  padding: 60px 40px;
-  flex-wrap: wrap;
-}
-
-.feature-card {
-  background: #fff;
-  border-radius: 12px;
-  padding: 30px;
-  width: 250px;
-  text-align: center;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-  transition: transform 0.3s;
-}
-
-.feature-card:hover {
-  transform: translateY(-5px);
-}
-
-.feature-card span {
-  font-size: 2.5rem;
-}
-
-.feature-card h3 {
-  margin: 15px 0 10px;
-  color: #1a1a2e;
-}
-
-.feature-card p {
-  color: #666;
-  font-size: 0.9rem;
-}
-
 /* ===== BUTTONS ===== */
 .btn-primary {
   background-color: #e94560;
@@ -130,6 +77,8 @@ body {
   cursor: pointer;
   font-size: 0.95rem;
   transition: all 0.3s;
+  text-decoration: none;
+  display: inline-block;
 }
 
 .btn-secondary:hover {
@@ -179,21 +128,31 @@ body {
   gap: 25px;
   padding: 10px 40px 60px;
   justify-content: flex-start;
+  flex: 1;
 }
 
 /* ===== EMPLOYEE CARD ===== */
 .employee-card {
   background: #fff;
   border-radius: 14px;
-  width: 220px;
+  width: 200px;
   padding: 25px 20px;
   text-align: center;
   box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-  transition: transform 0.3s;
+  transition: transform 0.3s, box-shadow 0.3s;
+  cursor: pointer;
+  height: fit-content;
 }
 
 .employee-card:hover {
-  transform: translateY(-5px);
+  transform: translateY(-6px);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.card-photo-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 12px;
 }
 
 .employee-card img {
@@ -201,84 +160,29 @@ body {
   height: 90px;
   border-radius: 50%;
   object-fit: cover;
-  margin-bottom: 15px;
   border: 3px solid #e94560;
 }
 
-.employee-card h3 {
-  font-size: 1rem;
+.emp-id-badge {
+  font-size: 1.1rem;
+  font-weight: 700;
   color: #1a1a2e;
-  margin-bottom: 5px;
+  text-align: center;
+  margin: 0 0 4px 0;
 }
 
-.employee-card .role {
-  font-size: 0.85rem;
-  color: #e94560;
-  margin-bottom: 5px;
+.emp-name {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #1a1a2e;
+  text-align: center;
+  margin: 0 0 6px 0;
 }
 
-.employee-card .department {
-  font-size: 0.8rem;
-  color: #888;
-  margin-bottom: 5px;
-}
-
-.employee-card .email,
 .employee-card .phone {
-  font-size: 0.78rem;
+  font-size: 0.8rem;
   color: #555;
-  margin-bottom: 3px;
-  word-break: break-all;
-}
-
-/* ===== CUSTOM FIELD ON CARD ===== */
-.employee-card .custom-field {
-  font-size: 0.78rem;
-  color: #555;
-  margin-bottom: 3px;
-  word-break: break-all;
-}
-
-.employee-card .custom-field span {
-  font-weight: 600;
-  color: #1a1a2e;
-}
-
-.card-actions {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  margin-top: 15px;
-}
-
-.btn-edit {
-  background-color: #1a1a2e;
-  color: #fff;
-  border: none;
-  padding: 7px 16px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 0.85rem;
-  transition: background 0.3s;
-}
-
-.btn-edit:hover {
-  background-color: #16213e;
-}
-
-.btn-delete {
-  background-color: #e94560;
-  color: #fff;
-  border: none;
-  padding: 7px 16px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 0.85rem;
-  transition: background 0.3s;
-}
-
-.btn-delete:hover {
-  background-color: #c73652;
+  font-weight: 700;
 }
 
 /* ===== MODAL ===== */
@@ -300,10 +204,11 @@ body {
   background: #fff;
   border-radius: 14px;
   padding: 35px;
-  width: 420px;
+  width: 620px;
   max-width: 95%;
   max-height: 90vh;
   overflow-y: auto;
+  overflow-x: hidden;
   box-shadow: 0 10px 40px rgba(0,0,0,0.2);
 }
 
@@ -401,10 +306,6 @@ body {
   border-color: #e94560;
 }
 
-.custom-field-row input::placeholder {
-  color: #aaa;
-}
-
 .btn-remove-field {
   background-color: #e94560;
   color: #fff;
@@ -425,6 +326,152 @@ body {
   background-color: #c73652;
 }
 
+/* ===== DETAIL PAGE ===== */
+.detail-container {
+  max-width: 820px;
+  margin: 40px auto;
+  padding: 0 20px 60px;
+}
+
+.detail-back {
+  margin-bottom: 24px;
+}
+
+.detail-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 40px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  display: flex;
+  gap: 40px;
+  align-items: flex-start;
+}
+
+.detail-photo-wrapper {
+  flex-shrink: 0;
+  display: flex;
+  justify-content: center;
+}
+
+.detail-photo {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid #e94560;
+}
+
+.detail-info {
+  flex: 1;
+}
+
+.detail-emp-id {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin-bottom: 4px;
+}
+
+.detail-emp-name {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 4px;
+}
+
+.detail-role {
+  color: #e94560;
+  font-size: 0.95rem;
+  margin-bottom: 16px;
+}
+
+.join-info {
+  background: #f4f6f9;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 20px;
+}
+
+.join-duration {
+  font-size: 0.88rem;
+  color: #555;
+  margin-bottom: 8px;
+}
+
+.leave-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.status-dot.green  { background-color: #28a745; }
+.status-dot.grey   { background-color: #888888; }
+.status-dot.red    { background-color: #e94560; }
+
+.leave-text {
+  font-size: 0.88rem;
+  color: #555;
+}
+
+.leave-text.overdue {
+  color: #e94560;
+  font-weight: 600;
+}
+
+.detail-fields {
+  border-top: 1px solid #eee;
+  padding-top: 16px;
+  margin-bottom: 24px;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 9px 0;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 0.9rem;
+}
+
+.detail-label {
+  font-weight: 600;
+  color: #555;
+}
+
+.detail-value {
+  color: #333;
+  text-align: right;
+  max-width: 60%;
+  word-break: break-word;
+}
+
+.detail-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.btn-delete {
+  background-color: #e94560;
+  color: #fff;
+  border: none;
+  padding: 10px 22px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: background 0.3s;
+}
+
+.btn-delete:hover {
+  background-color: #c73652;
+}
+
 /* ===== FOOTER ===== */
 .footer {
   background-color: #1a1a2e;
@@ -442,10 +489,6 @@ body {
     padding: 15px 20px;
   }
 
-  .hero h1 {
-    font-size: 1.8rem;
-  }
-
   .page-header {
     flex-direction: column;
     align-items: flex-start;
@@ -454,5 +497,23 @@ body {
   .employee-grid {
     justify-content: center;
     padding: 10px 20px 40px;
+  }
+
+  .detail-card {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 24px;
+    gap: 24px;
+  }
+
+  .detail-row {
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .detail-value {
+    text-align: left;
+    max-width: 100%;
   }
 }

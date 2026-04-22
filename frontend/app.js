@@ -11,6 +11,39 @@ async function loadEmployees() {
   renderCards(allEmployees);
 }
 
+function getStatusColor(emp) {
+  if (!emp.joinDate || !emp.leaveDays) return '#e94560';
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const deadline = new Date(emp.joinDate);
+  deadline.setDate(deadline.getDate() + 365);
+
+  if (emp.leaveGrantedDate && emp.leaveGrantedDate !== 'null') {
+    const grantedDate = new Date(emp.leaveGrantedDate);
+    grantedDate.setHours(0, 0, 0, 0);
+    const leaveEndDate = new Date(grantedDate);
+    leaveEndDate.setDate(leaveEndDate.getDate() + emp.leaveDays);
+
+    // Currently on leave
+    if (today >= grantedDate && today < leaveEndDate) return '#888888';
+
+    // Leave finished — count next 365 days
+    if (today >= leaveEndDate) {
+      const nextDeadline = new Date(leaveEndDate);
+      nextDeadline.setDate(nextDeadline.getDate() + 365);
+      return today > nextDeadline ? '#e94560' : '#28a745';
+    }
+
+    // Leave granted but not started yet — check if 365 days passed
+    return today > deadline ? '#e94560' : '#28a745';
+  }
+
+  return today > deadline ? '#e94560' : '#28a745';
+}
+
+
 function renderCards(employees) {
   const grid = document.getElementById('employeeGrid');
   grid.innerHTML = '';
@@ -28,29 +61,20 @@ function renderCards(employees) {
       ? emp.photo
       : 'https://ui-avatars.com/api/?name=' + encodeURIComponent(emp.name) + '&background=e94560&color=fff&size=128';
 
-    // Render custom fields on card
-    let customFieldsHTML = '';
-    if (emp.customFields && emp.customFields.length > 0) {
-      emp.customFields.forEach(cf => {
-        if (cf.label && cf.value) {
-          customFieldsHTML += `<p class="custom-field"><span>${cf.label}:</span> ${cf.value}</p>`;
-        }
-      });
-    }
-
+    const borderColor = getStatusColor(emp);
     card.innerHTML = `
-      <img src="${imgSrc}" alt="${emp.name}" />
-      <h3>${emp.name}</h3>
-      <p class="role">${emp.role || ''}</p>
-      <p class="department">${emp.department || ''}</p>
-      <p class="email">${emp.email || ''}</p>
-      <p class="phone">${emp.phone || ''}</p>
-      ${customFieldsHTML}
-      <div class="card-actions">
-        <button class="btn-edit" onclick="openEditModal('${emp.id}')">Edit</button>
-        <button class="btn-delete" onclick="deleteEmployee('${emp.id}')">Delete</button>
+      <div class="card-photo-wrapper">
+        <img src="${imgSrc}" alt="${emp.name}" style="border-color: ${borderColor};" />
       </div>
+      <h3 class="emp-id-badge">${emp.employeeId || ''}</h3>
+      <h4 class="emp-name">${emp.name}</h4>
+      <p class="phone">${emp.phone || ''}</p>
     `;
+
+    card.addEventListener('click', () => {
+      window.location.href = `employee-detail.html?id=${emp.id}`;
+    });
+
     grid.appendChild(card);
   });
 }
@@ -90,7 +114,6 @@ function initCropper() {
     empPhoto.addEventListener('change', (e) => {
       const file = e.target.files[0];
       if (!file) return;
-
       const reader = new FileReader();
       reader.onload = (ev) => {
         const cropImage = document.getElementById('cropImage');
@@ -139,6 +162,7 @@ function initSearch() {
       const query = searchInput.value.toLowerCase();
       const filtered = allEmployees.filter(emp =>
         emp.name?.toLowerCase().includes(query) ||
+        emp.employeeId?.toLowerCase().includes(query) ||
         emp.role?.toLowerCase().includes(query) ||
         emp.department?.toLowerCase().includes(query)
       );
@@ -165,20 +189,21 @@ function openEditModal(id) {
   if (!emp) return;
   document.getElementById('modalTitle').textContent = 'Edit Employee';
   document.getElementById('employeeId').value = emp.id;
+  document.getElementById('empEmployeeId').value = emp.employeeId || '';
   document.getElementById('empName').value = emp.name || '';
   document.getElementById('empRole').value = emp.role || '';
   document.getElementById('empEmail').value = emp.email || '';
   document.getElementById('empPhone').value = emp.phone || '';
   document.getElementById('empDepartment').value = emp.department || '';
+  document.getElementById('empJoinDate').value = emp.joinDate || '';
+  document.getElementById('empLeaveDays').value = emp.leaveDays || '';
+  document.getElementById('empLeaveGrantedDate').value = emp.leaveGrantedDate || '';
   document.getElementById('cropContainer').style.display = 'none';
   document.getElementById('croppedPreview').style.display = 'none';
   clearCustomFields();
-
-  // Load existing custom fields
   if (emp.customFields && emp.customFields.length > 0) {
     emp.customFields.forEach(cf => addCustomField(cf.label, cf.value));
   }
-
   croppedBlob = null;
   if (cropper) { cropper.destroy(); cropper = null; }
   document.getElementById('modalOverlay').classList.add('active');
@@ -191,7 +216,7 @@ function closeModal() {
   clearCustomFields();
 }
 
-// ===== CONVERT BLOB TO BASE64 =====
+// ===== BLOB TO BASE64 =====
 function blobToBase64(blob) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -201,7 +226,6 @@ function blobToBase64(blob) {
   });
 }
 
-// ===== GET PHOTO AS BASE64 =====
 async function getPhotoBase64() {
   if (croppedBlob) return await blobToBase64(croppedBlob);
   const empPhoto = document.getElementById('empPhoto');
@@ -211,7 +235,7 @@ async function getPhotoBase64() {
   return null;
 }
 
-// ===== ADD / EDIT EMPLOYEE FORM SUBMIT =====
+// ===== FORM SUBMIT =====
 function initForm() {
   const employeeForm = document.getElementById('employeeForm');
   if (employeeForm) {
@@ -234,11 +258,15 @@ function initForm() {
       }
 
       const employeeData = {
+        employeeId: document.getElementById('empEmployeeId').value,
         name: document.getElementById('empName').value,
         role: document.getElementById('empRole').value,
         email: document.getElementById('empEmail').value,
         phone: document.getElementById('empPhone').value,
         department: document.getElementById('empDepartment').value,
+        joinDate: document.getElementById('empJoinDate').value,
+        leaveDays: parseInt(document.getElementById('empLeaveDays').value) || 0,
+        leaveGrantedDate: document.getElementById('empLeaveGrantedDate').value || null,
         customFields: getCustomFields(),
       };
 
@@ -269,19 +297,12 @@ function initForm() {
   }
 }
 
-// ===== DELETE EMPLOYEE =====
-async function deleteEmployee(id) {
-  if (!confirm('Are you sure you want to delete this employee?')) return;
-  await fetch(`${API}/employees/${id}`, { method: 'DELETE' });
-  loadEmployees();
-}
-
 // ===== EXPORT CSV =====
 function exportCSV() {
   window.location.href = `${API}/employees/export`;
 }
 
-// ===== LOAD ON PAGE READY =====
+// ===== INIT =====
 document.addEventListener('DOMContentLoaded', () => {
   initCropper();
   initSearch();
