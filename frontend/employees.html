@@ -38,59 +38,57 @@
           <label>Employee ID</label>
           <input type="text" id="empEmployeeId" placeholder="Enter employee ID (e.g. T1)" required />
         </div>
-
         <div class="form-group">
           <label>Full Name</label>
           <input type="text" id="empName" placeholder="Enter full name" required />
         </div>
-
         <div class="form-group">
           <label>Role</label>
           <input type="text" id="empRole" placeholder="Enter role" />
         </div>
-
         <div class="form-group">
           <label>Email</label>
           <input type="email" id="empEmail" placeholder="Enter email" />
         </div>
-
         <div class="form-group">
           <label>Phone</label>
           <input type="text" id="empPhone" placeholder="Enter phone number" />
         </div>
-
         <div class="form-group">
           <label>Department</label>
           <input type="text" id="empDepartment" placeholder="Enter department" />
         </div>
-
         <div class="form-group">
           <label>Join Date</label>
           <input type="date" id="empJoinDate" />
         </div>
-
         <div class="form-group">
           <label>Annual Leave Days</label>
           <input type="number" id="empLeaveDays" placeholder="e.g. 60" min="1" required />
         </div>
-
         <div class="form-group">
           <label>Grant Leave From</label>
           <input type="date" id="empLeaveGrantedDate" />
         </div>
-
+        <div class="form-group">
+          <label>Extend Leave Until</label>
+          <input type="date" id="empExtendLeaveUntil" />
+        </div>
         <div class="form-group">
           <label>Photo</label>
-          <input type="file" id="empPhoto" accept="image/*" />
+          <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+            <input type="file" id="empPhoto" accept="image/*" />
+            <input type="file" id="empCamera" accept="image/*" capture="environment" style="display:none;" />
+            <button type="button" class="btn-secondary" onclick="openWebcam()">📷 Camera</button>
+          </div>
           <div id="cropContainer" style="display:none; margin-top:10px;">
             <img id="cropImage" style="max-width:100%; display:block;" />
-            <button type="button" class="btn-primary" id="cropBtn" style="margin-top:10px;"> Crop & Use Photo</button>
+            <button type="button" class="btn-primary" id="cropBtn" style="margin-top:10px;">✂️ Crop & Use Photo</button>
           </div>
           <canvas id="croppedCanvas" style="display:none;"></canvas>
           <img id="croppedPreview" style="display:none; width:90px; height:90px; border-radius:50%; object-fit:cover; border:3px solid #e94560; margin-top:10px;" />
         </div>
 
-        <!-- Custom Fields Section -->
         <div id="customFieldsContainer"></div>
 
         <div class="modal-actions">
@@ -99,6 +97,19 @@
           <button type="button" class="btn-secondary" onclick="closeModal()">Cancel</button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- Webcam Modal -->
+  <div id="webcamModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:300; justify-content:center; align-items:center;">
+    <div style="background:#fff; border-radius:14px; padding:24px; width:420px; max-width:95%; text-align:center;">
+      <h3 style="margin-bottom:16px; color:#1a1a2e;">Take Photo</h3>
+      <video id="webcamVideo" autoplay playsinline style="width:100%; border-radius:8px; margin-bottom:12px;"></video>
+      <canvas id="webcamCanvas" style="display:none;"></canvas>
+      <div style="display:flex; gap:10px; justify-content:center; margin-top:8px;">
+        <button type="button" class="btn-primary" id="webcamCaptureBtn">📸 Capture</button>
+        <button type="button" class="btn-secondary" id="webcamCloseBtn">✕ Close</button>
+      </div>
     </div>
   </div>
 

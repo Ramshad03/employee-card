@@ -3,6 +3,7 @@ const API = 'http://localhost:3000/api';
 let allEmployees = [];
 let cropper = null;
 let croppedBlob = null;
+let webcamStream = null;
 
 // ===== FETCH AND RENDER EMPLOYEES =====
 async function loadEmployees() {
@@ -23,26 +24,30 @@ function getStatusColor(emp) {
   if (emp.leaveGrantedDate && emp.leaveGrantedDate !== 'null') {
     const grantedDate = new Date(emp.leaveGrantedDate);
     grantedDate.setHours(0, 0, 0, 0);
-    const leaveEndDate = new Date(grantedDate);
-    leaveEndDate.setDate(leaveEndDate.getDate() + emp.leaveDays);
 
-    // Currently on leave
+    let leaveEndDate;
+    if (emp.extendLeaveUntil && emp.extendLeaveUntil !== 'null') {
+      leaveEndDate = new Date(emp.extendLeaveUntil);
+      leaveEndDate.setHours(0, 0, 0, 0);
+      leaveEndDate.setDate(leaveEndDate.getDate() + 1);
+    } else {
+      leaveEndDate = new Date(grantedDate);
+      leaveEndDate.setDate(leaveEndDate.getDate() + emp.leaveDays);
+    }
+
     if (today >= grantedDate && today < leaveEndDate) return '#888888';
 
-    // Leave finished — count next 365 days
     if (today >= leaveEndDate) {
       const nextDeadline = new Date(leaveEndDate);
       nextDeadline.setDate(nextDeadline.getDate() + 365);
       return today > nextDeadline ? '#e94560' : '#28a745';
     }
 
-    // Leave granted but not started yet — check if 365 days passed
     return today > deadline ? '#e94560' : '#28a745';
   }
 
   return today > deadline ? '#e94560' : '#28a745';
 }
-
 
 function renderCards(employees) {
   const grid = document.getElementById('employeeGrid');
@@ -62,6 +67,7 @@ function renderCards(employees) {
       : 'https://ui-avatars.com/api/?name=' + encodeURIComponent(emp.name) + '&background=e94560&color=fff&size=128';
 
     const borderColor = getStatusColor(emp);
+
     card.innerHTML = `
       <div class="card-photo-wrapper">
         <img src="${imgSrc}" alt="${emp.name}" style="border-color: ${borderColor};" />
@@ -107,32 +113,110 @@ function clearCustomFields() {
   document.getElementById('customFieldsContainer').innerHTML = '';
 }
 
+// ===== WEBCAM =====
+async function openWebcam() {
+  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+  if (isMobile) {
+    document.getElementById('empCamera').click();
+    return;
+  }
+
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    alert('Your browser does not support camera access. Please use Chrome or Edge.');
+    return;
+  }
+
+  const modal = document.getElementById('webcamModal');
+  if (!modal) {
+    alert('Webcam modal not found.');
+    return;
+  }
+  modal.style.display = 'flex';
+
+  try {
+    webcamStream = await navigator.mediaDevices.getUserMedia({
+      video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: 'user' }
+    });
+    document.getElementById('webcamVideo').srcObject = webcamStream;
+  } catch (err) {
+    modal.style.display = 'none';
+    if (err.name === 'NotAllowedError') {
+      alert('Camera access denied. Please click the 🔒 lock icon in the address bar and set Camera to Allow, then refresh.');
+    } else if (err.name === 'NotFoundError') {
+      alert('No camera found on this device.');
+    } else {
+      alert('Camera error: ' + err.message);
+    }
+  }
+}
+
+function closeWebcam() {
+  document.getElementById('webcamModal').style.display = 'none';
+  if (webcamStream) {
+    webcamStream.getTracks().forEach(t => t.stop());
+    webcamStream = null;
+  }
+}
+
 // ===== IMAGE CROPPER =====
 function initCropper() {
+  function handlePhotoInput(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const cropImage = document.getElementById('cropImage');
+      document.getElementById('cropContainer').style.display = 'block';
+      document.getElementById('croppedPreview').style.display = 'none';
+      cropImage.src = ev.target.result;
+      setTimeout(() => {
+        if (cropper) cropper.destroy();
+        cropper = new Cropper(cropImage, {
+          aspectRatio: 1, viewMode: 1,
+          movable: true, zoomable: true,
+          scalable: true, cropBoxResizable: true,
+        });
+      }, 200);
+    };
+    reader.readAsDataURL(file);
+  }
+
   const empPhoto = document.getElementById('empPhoto');
-  if (empPhoto) {
-    empPhoto.addEventListener('change', (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = (ev) => {
+  if (empPhoto) empPhoto.addEventListener('change', handlePhotoInput);
+
+  const empCamera = document.getElementById('empCamera');
+  if (empCamera) empCamera.addEventListener('change', handlePhotoInput);
+
+  // Webcam close
+  const webcamCloseBtn = document.getElementById('webcamCloseBtn');
+  if (webcamCloseBtn) webcamCloseBtn.addEventListener('click', closeWebcam);
+
+  // Webcam capture
+  const webcamCaptureBtn = document.getElementById('webcamCaptureBtn');
+  if (webcamCaptureBtn) {
+    webcamCaptureBtn.addEventListener('click', () => {
+      const video = document.getElementById('webcamVideo');
+      const canvas = document.getElementById('webcamCanvas');
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      canvas.getContext('2d').drawImage(video, 0, 0);
+      canvas.toBlob((blob) => {
+        closeWebcam();
+        const url = URL.createObjectURL(blob);
         const cropImage = document.getElementById('cropImage');
         document.getElementById('cropContainer').style.display = 'block';
         document.getElementById('croppedPreview').style.display = 'none';
-        cropImage.src = ev.target.result;
+        cropImage.src = url;
         setTimeout(() => {
           if (cropper) cropper.destroy();
           cropper = new Cropper(cropImage, {
-            aspectRatio: 1,
-            viewMode: 1,
-            movable: true,
-            zoomable: true,
-            scalable: true,
-            cropBoxResizable: true,
+            aspectRatio: 1, viewMode: 1,
+            movable: true, zoomable: true,
+            scalable: true, cropBoxResizable: true,
           });
         }, 200);
-      };
-      reader.readAsDataURL(file);
+      }, 'image/jpeg', 0.9);
     });
   }
 
@@ -198,6 +282,7 @@ function openEditModal(id) {
   document.getElementById('empJoinDate').value = emp.joinDate || '';
   document.getElementById('empLeaveDays').value = emp.leaveDays || '';
   document.getElementById('empLeaveGrantedDate').value = emp.leaveGrantedDate || '';
+  document.getElementById('empExtendLeaveUntil').value = emp.extendLeaveUntil || '';
   document.getElementById('cropContainer').style.display = 'none';
   document.getElementById('croppedPreview').style.display = 'none';
   clearCustomFields();
@@ -267,6 +352,7 @@ function initForm() {
         joinDate: document.getElementById('empJoinDate').value,
         leaveDays: parseInt(document.getElementById('empLeaveDays').value) || 0,
         leaveGrantedDate: document.getElementById('empLeaveGrantedDate').value || null,
+        extendLeaveUntil: document.getElementById('empExtendLeaveUntil').value || null,
         customFields: getCustomFields(),
       };
 
@@ -295,6 +381,13 @@ function initForm() {
       loadEmployees();
     });
   }
+}
+
+// ===== DELETE EMPLOYEE =====
+async function deleteEmployee(id) {
+  if (!confirm('Are you sure you want to delete this employee?')) return;
+  await fetch(`${API}/employees/${id}`, { method: 'DELETE' });
+  loadEmployees();
 }
 
 // ===== EXPORT CSV =====

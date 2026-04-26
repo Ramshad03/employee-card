@@ -472,6 +472,75 @@ body {
   background-color: #c73652;
 }
 
+/* ===== PHOTO UPLOAD ROW ===== */
+.photo-upload-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.btn-camera {
+  background: #1a1a2e;
+  color: #e94560;
+  border: 1.5px solid #e94560;
+  padding: 7px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.88rem;
+  transition: background 0.2s, color 0.2s;
+  white-space: nowrap;
+}
+
+.btn-camera:hover {
+  background: #e94560;
+  color: #fff;
+}
+
+/* ===== CAMERA MODAL ===== */
+.camera-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+}
+
+.camera-overlay.active {
+  display: flex;
+}
+
+.camera-modal {
+  background: #1a1a2e;
+  border-radius: 12px;
+  padding: 24px;
+  width: 90%;
+  max-width: 480px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+.camera-modal h4 {
+  color: #e94560;
+  margin: 0 0 14px;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.camera-modal video {
+  width: 100%;
+  border-radius: 8px;
+  display: block;
+}
+
+.camera-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+  justify-content: flex-end;
+}
+
 /* ===== FOOTER ===== */
 .footer {
   background-color: #1a1a2e;
@@ -516,4 +585,10 @@ body {
     text-align: left;
     max-width: 100%;
   }
+}
+.total-leave-taken {
+  font-size: 0.82rem;
+  color: #555;
+  margin-top: 6px;
+  padding-left: 18px;
 }

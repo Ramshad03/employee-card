@@ -26,7 +26,6 @@
       <h3>Edit Employee</h3>
       <form id="employeeForm">
         <input type="hidden" id="employeeId" />
-
         <div class="form-group">
           <label>Employee ID</label>
           <input type="text" id="empEmployeeId" placeholder="Enter employee ID" required />
@@ -64,11 +63,19 @@
           <input type="date" id="empLeaveGrantedDate" />
         </div>
         <div class="form-group">
+          <label>Extend Leave Until</label>
+          <input type="date" id="empExtendLeaveUntil" />
+        </div>
+        <div class="form-group">
           <label>Photo</label>
-          <input type="file" id="empPhoto" accept="image/*" />
+          <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+            <input type="file" id="empPhoto" accept="image/*" />
+            <input type="file" id="empCamera" accept="image/*" capture="environment" style="display:none;" />
+            <button type="button" class="btn-secondary" onclick="openWebcam()">📷 Camera</button>
+          </div>
           <div id="cropContainer" style="display:none; margin-top:10px;">
             <img id="cropImage" style="max-width:100%; display:block;" />
-            <button type="button" class="btn-primary" id="cropBtn" style="margin-top:10px;"> Crop & Use Photo</button>
+            <button type="button" class="btn-primary" id="cropBtn" style="margin-top:10px;">✂️ Crop & Use Photo</button>
           </div>
           <canvas id="croppedCanvas" style="display:none;"></canvas>
           <img id="croppedPreview" style="display:none; width:90px; height:90px; border-radius:50%; object-fit:cover; border:3px solid #e94560; margin-top:10px;" />
@@ -85,6 +92,19 @@
     </div>
   </div>
 
+  <!-- Webcam Modal -->
+  <div id="webcamModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:300; justify-content:center; align-items:center;">
+    <div style="background:#fff; border-radius:14px; padding:24px; width:420px; max-width:95%; text-align:center;">
+      <h3 style="margin-bottom:16px; color:#1a1a2e;">Take Photo</h3>
+      <video id="webcamVideo" autoplay playsinline style="width:100%; border-radius:8px; margin-bottom:12px;"></video>
+      <canvas id="webcamCanvas" style="display:none;"></canvas>
+      <div style="display:flex; gap:10px; justify-content:center; margin-top:8px;">
+        <button type="button" class="btn-primary" id="webcamCaptureBtn">📸 Capture</button>
+        <button type="button" class="btn-secondary" id="webcamCloseBtn">✕ Close</button>
+      </div>
+    </div>
+  </div>
+
   <footer class="footer">
     <p>© 2026 Employee Card System. All rights reserved.</p>
   </footer>
@@ -95,6 +115,7 @@
     let currentEmployee = null;
     let cropper = null;
     let croppedBlob = null;
+    let webcamStream = null;
 
     const urlParams = new URLSearchParams(window.location.search);
     const empId = urlParams.get('id');
@@ -112,8 +133,16 @@
       if (emp.leaveGrantedDate && emp.leaveGrantedDate !== 'null') {
         const grantedDate = new Date(emp.leaveGrantedDate);
         grantedDate.setHours(0, 0, 0, 0);
-        const leaveEndDate = new Date(grantedDate);
-        leaveEndDate.setDate(leaveEndDate.getDate() + emp.leaveDays);
+
+        let leaveEndDate;
+        if (emp.extendLeaveUntil && emp.extendLeaveUntil !== 'null') {
+          leaveEndDate = new Date(emp.extendLeaveUntil);
+          leaveEndDate.setHours(0, 0, 0, 0);
+          leaveEndDate.setDate(leaveEndDate.getDate() + 1);
+        } else {
+          leaveEndDate = new Date(grantedDate);
+          leaveEndDate.setDate(leaveEndDate.getDate() + emp.leaveDays);
+        }
 
         if (today >= grantedDate && today < leaveEndDate) return '#888888';
 
@@ -158,7 +187,7 @@
     }
 
     // ===== CALCULATE LEAVE DUE =====
-    function calcLeaveDue(joinDate, leaveDays, leaveGrantedDate) {
+    function calcLeaveDue(joinDate, leaveDays, leaveGrantedDate, extendLeaveUntil) {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
 
@@ -172,28 +201,38 @@
       if (leaveGrantedDate && leaveGrantedDate !== 'null') {
         const grantedDate = new Date(leaveGrantedDate);
         grantedDate.setHours(0, 0, 0, 0);
-        const leaveEndDate = new Date(grantedDate);
-        leaveEndDate.setDate(leaveEndDate.getDate() + leaveDays);
+
+        let leaveEndDate;
+        if (extendLeaveUntil && extendLeaveUntil !== 'null') {
+          leaveEndDate = new Date(extendLeaveUntil);
+          leaveEndDate.setHours(0, 0, 0, 0);
+          leaveEndDate.setDate(leaveEndDate.getDate() + 1);
+        } else {
+          leaveEndDate = new Date(grantedDate);
+          leaveEndDate.setDate(leaveEndDate.getDate() + leaveDays);
+        }
+
+        const totalLeaveTaken = Math.round((leaveEndDate - grantedDate) / (1000 * 60 * 60 * 24));
 
         if (today >= grantedDate && today < leaveEndDate) {
           const daysIntoLeave = Math.round((today - grantedDate) / (1000 * 60 * 60 * 24));
-          return { status: 'grey', displayDays: daysIntoLeave, mode: 'onleave' };
+          return { status: 'grey', displayDays: daysIntoLeave, mode: 'onleave', totalLeaveTaken };
         }
 
         if (today >= leaveEndDate) {
           const nextDeadline = new Date(leaveEndDate);
           nextDeadline.setDate(nextDeadline.getDate() + 365);
           const nextDays = Math.round((nextDeadline - today) / (1000 * 60 * 60 * 24));
-          if (nextDays < 0) return { status: 'red', displayDays: nextDays, mode: 'overdue' };
-          return { status: 'green', displayDays: nextDays, mode: 'countdown' };
+          if (nextDays < 0) return { status: 'red', displayDays: nextDays, mode: 'overdue', totalLeaveTaken };
+          return { status: 'green', displayDays: nextDays, mode: 'countdown', totalLeaveTaken };
         }
 
-        if (daysRemaining < 0) return { status: 'red', displayDays: daysRemaining, mode: 'overdue' };
-        return { status: 'green', displayDays: daysRemaining, mode: 'countdown' };
+        if (daysRemaining < 0) return { status: 'red', displayDays: daysRemaining, mode: 'overdue', totalLeaveTaken };
+        return { status: 'green', displayDays: daysRemaining, mode: 'countdown', totalLeaveTaken };
       }
 
-      if (daysRemaining < 0) return { status: 'red', displayDays: daysRemaining, mode: 'overdue' };
-      return { status: 'green', displayDays: daysRemaining, mode: 'countdown' };
+      if (daysRemaining < 0) return { status: 'red', displayDays: daysRemaining, mode: 'overdue', totalLeaveTaken: 0 };
+      return { status: 'green', displayDays: daysRemaining, mode: 'countdown', totalLeaveTaken: 0 };
     }
 
     // ===== LOAD EMPLOYEE =====
@@ -226,7 +265,7 @@
         joinDurationHTML = `<p class="join-duration">📅 Number of days joined: ${duration}</p>`;
 
         if (emp.leaveDays) {
-          const { status, displayDays, mode } = calcLeaveDue(emp.joinDate, emp.leaveDays, emp.leaveGrantedDate);
+          const { status, displayDays, mode, totalLeaveTaken } = calcLeaveDue(emp.joinDate, emp.leaveDays, emp.leaveGrantedDate, emp.extendLeaveUntil);
           const isOverdue = status === 'red';
 
           let leaveLabel = '';
@@ -238,11 +277,16 @@
             leaveLabel = `Leave due in ${displayDays} day${displayDays !== 1 ? 's' : ''}`;
           }
 
+          const totalLeaveHTML = totalLeaveTaken > 0
+            ? `<p class="total-leave-taken">Total leave taken: ${totalLeaveTaken} day${totalLeaveTaken !== 1 ? 's' : ''}</p>`
+            : '';
+
           leaveHTML = `
             <div class="leave-status">
               <span class="status-dot ${status}"></span>
               <span class="leave-text ${isOverdue ? 'overdue' : ''}">${leaveLabel}</span>
-            </div>`;
+            </div>
+            ${totalLeaveHTML}`;
         }
       }
 
@@ -299,6 +343,52 @@
         </div>`;
     }
 
+    // ===== WEBCAM =====
+    async function openWebcam() {
+      const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+      if (isMobile) {
+        document.getElementById('empCamera').click();
+        return;
+      }
+
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        alert('Your browser does not support camera access. Please use Chrome or Edge.');
+        return;
+      }
+
+      const modal = document.getElementById('webcamModal');
+      if (!modal) {
+        alert('Webcam modal not found.');
+        return;
+      }
+      modal.style.display = 'flex';
+
+      try {
+        webcamStream = await navigator.mediaDevices.getUserMedia({
+          video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: 'user' }
+        });
+        document.getElementById('webcamVideo').srcObject = webcamStream;
+      } catch (err) {
+        modal.style.display = 'none';
+        if (err.name === 'NotAllowedError') {
+          alert('Camera access denied. Please click the 🔒 lock icon in the address bar and set Camera to Allow, then refresh.');
+        } else if (err.name === 'NotFoundError') {
+          alert('No camera found on this device.');
+        } else {
+          alert('Camera error: ' + err.message);
+        }
+      }
+    }
+
+    function closeWebcam() {
+      document.getElementById('webcamModal').style.display = 'none';
+      if (webcamStream) {
+        webcamStream.getTracks().forEach(t => t.stop());
+        webcamStream = null;
+      }
+    }
+
     // ===== EDIT MODAL =====
     function openEditModal() {
       const emp = currentEmployee;
@@ -312,6 +402,7 @@
       document.getElementById('empJoinDate').value = emp.joinDate || '';
       document.getElementById('empLeaveDays').value = emp.leaveDays || '';
       document.getElementById('empLeaveGrantedDate').value = emp.leaveGrantedDate || '';
+      document.getElementById('empExtendLeaveUntil').value = emp.extendLeaveUntil || '';
       document.getElementById('cropContainer').style.display = 'none';
       document.getElementById('croppedPreview').style.display = 'none';
       clearCustomFields();
@@ -360,17 +451,51 @@
 
     // ===== CROPPER =====
     function initCropper() {
+      function handlePhotoInput(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          const cropImage = document.getElementById('cropImage');
+          document.getElementById('cropContainer').style.display = 'block';
+          document.getElementById('croppedPreview').style.display = 'none';
+          cropImage.src = ev.target.result;
+          setTimeout(() => {
+            if (cropper) cropper.destroy();
+            cropper = new Cropper(cropImage, {
+              aspectRatio: 1, viewMode: 1,
+              movable: true, zoomable: true,
+              scalable: true, cropBoxResizable: true,
+            });
+          }, 200);
+        };
+        reader.readAsDataURL(file);
+      }
+
       const empPhoto = document.getElementById('empPhoto');
-      if (empPhoto) {
-        empPhoto.addEventListener('change', (e) => {
-          const file = e.target.files[0];
-          if (!file) return;
-          const reader = new FileReader();
-          reader.onload = (ev) => {
+      if (empPhoto) empPhoto.addEventListener('change', handlePhotoInput);
+
+      const empCamera = document.getElementById('empCamera');
+      if (empCamera) empCamera.addEventListener('change', handlePhotoInput);
+
+      const webcamCloseBtn = document.getElementById('webcamCloseBtn');
+      if (webcamCloseBtn) webcamCloseBtn.addEventListener('click', closeWebcam);
+
+      const webcamCaptureBtn = document.getElementById('webcamCaptureBtn');
+      if (webcamCaptureBtn) {
+        webcamCaptureBtn.addEventListener('click', () => {
+          const video = document.getElementById('webcamVideo');
+          const canvas = document.getElementById('webcamCanvas');
+          canvas.width = video.videoWidth;
+          canvas.height = video.videoHeight;
+          canvas.getContext('2d').drawImage(video, 0, 0);
+          canvas.toBlob((blob) => {
+            closeWebcam();
+            const url = URL.createObjectURL(blob);
             const cropImage = document.getElementById('cropImage');
             document.getElementById('cropContainer').style.display = 'block';
             document.getElementById('croppedPreview').style.display = 'none';
-            cropImage.src = ev.target.result;
+            cropImage.src = url;
             setTimeout(() => {
               if (cropper) cropper.destroy();
               cropper = new Cropper(cropImage, {
@@ -379,8 +504,7 @@
                 scalable: true, cropBoxResizable: true,
               });
             }, 200);
-          };
-          reader.readAsDataURL(file);
+          }, 'image/jpeg', 0.9);
         });
       }
 
@@ -425,7 +549,6 @@
     document.addEventListener('DOMContentLoaded', () => {
       initCropper();
 
-      // Form submit inside DOMContentLoaded so element exists
       document.getElementById('employeeForm').addEventListener('submit', async (e) => {
         e.preventDefault();
 
@@ -454,6 +577,7 @@
           joinDate: document.getElementById('empJoinDate').value,
           leaveDays: parseInt(document.getElementById('empLeaveDays').value) || 0,
           leaveGrantedDate: document.getElementById('empLeaveGrantedDate').value || null,
+          extendLeaveUntil: document.getElementById('empExtendLeaveUntil').value || null,
           customFields: getCustomFields(),
         };
 
