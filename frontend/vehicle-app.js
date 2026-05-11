@@ -9,6 +9,7 @@ function blobToBase64(blob) {
     reader.readAsDataURL(blob);
   });
 }
+
 let vehCropper = null;
 let vehCroppedBlob = null;
 
@@ -34,19 +35,38 @@ async function loadVehicles() {
 function renderVehicleCards(vehicles) {
   const grid = document.getElementById('vehicleGrid');
   if (!vehicles.length) {
-    grid.innerHTML = '<p style="color:#888; text-align:center; margin-top:40px;">No vehicles found.</p>';
+    grid.innerHTML = '<p style="color:#888; text-align:center; margin-top:80px;">No vehicles found.</p>';
     return;
   }
 
   grid.innerHTML = vehicles.map(v => {
     const statusColor = getVehicleStatusColor(v.status);
+
+    // Mulkiya bookmark color
+    function getMulkiyaColor(expiryDate) {
+      if (!expiryDate) return null;
+      const today = new Date(); today.setHours(0,0,0,0);
+      const expiry = new Date(expiryDate); expiry.setHours(0,0,0,0);
+      const daysLeft = Math.round((expiry - today) / (1000 * 60 * 60 * 24));
+      if (daysLeft < 0)   return '#e94560';
+      if (daysLeft <= 45) return '#e67e22';
+      if (daysLeft <= 90) return '#f1c40f';
+      return '#27ae60';
+    }
+    const mulkiyaColor = v.mulkiyaNumber ? getMulkiyaColor(v.mulkiyaExpiryDate) : null;
+
+    const bookmarkHTML = mulkiyaColor ? `
+      <div style="position:absolute; top:0; left:12px; width:22px; height:32px; background:${mulkiyaColor}; clip-path:polygon(0 0, 100% 0, 100% 85%, 50% 100%, 0 85%); z-index:2;"></div>
+    ` : '';
+
     const photoHTML = v.photo
-      ? `<img src="${v.photo}" alt="${v.name}" style="width:100px; height:70px; object-fit:cover; border-radius:8px; border:3px solid ${statusColor};" />`
-      : `<div style="width:100px; height:70px; border-radius:8px; background:${statusColor}; display:flex; align-items:center; justify-content:center; font-size:28px;">🚗</div>`;
+      ? `<img src="${v.photo}" alt="${v.name}" style="width:100%; height:110px; object-fit:cover; border-radius:8px; border:3px solid ${statusColor};" />`
+      : `<div style="width:100%; height:110px; border-radius:8px; background:${statusColor}; display:flex; align-items:center; justify-content:center; font-size:48px;">🚗</div>`;
 
     return `
       <div class="employee-card" onclick="window.location.href='vehicle-detail.html?id=${v.id}'" style="cursor:pointer;">
-        <div class="card-photo">
+        <div class="card-photo" style="position:relative;">
+          ${bookmarkHTML}
           ${photoHTML}
         </div>
         <div class="card-info">
@@ -95,25 +115,27 @@ async function openEditVehicleModal(id) {
   document.getElementById('vehType').value = v.type || '';
   document.getElementById('vehDriver').value = v.driver || '';
   document.getElementById('vehRegDate').value = v.regDate || '';
+  document.getElementById('vehInsuranceProvider').value = v.insuranceProvider || '';
+  document.getElementById('vehPolicyNumber').value = v.policyNumber || '';
+  document.getElementById('vehInsuranceStartDate').value = v.insuranceStartDate || '';
   document.getElementById('vehInsuranceExpiry').value = v.insuranceExpiry || '';
+  document.getElementById('vehMulkiyaNumber').value = v.mulkiyaNumber || '';
+  document.getElementById('vehMulkiyaIssueDate').value = v.mulkiyaIssueDate || '';
+  document.getElementById('vehMulkiyaExpiryDate').value = v.mulkiyaExpiryDate || '';
   document.getElementById('vehStatus').value = v.status || 'Active';
 
-  // Load existing photo preview
   const preview = document.getElementById('vehCroppedPreview');
-  if (v.photo) {
-    preview.src = v.photo;
-    preview.style.display = 'block';
-  } else {
-    preview.style.display = 'none';
-  }
+  if (v.photo) { preview.src = v.photo; preview.style.display = 'block'; }
+  else { preview.style.display = 'none'; }
 
-  // Load custom fields
+  document.getElementById('vehCropContainer').style.display = 'none';
+  vehCroppedBlob = null;
+  if (vehCropper) { vehCropper.destroy(); vehCropper = null; }
+
   const container = document.getElementById('vehCustomFieldsContainer');
   container.innerHTML = '';
   if (v.customFields) {
-    v.customFields.forEach(f => {
-      addVehicleCustomField(f.label, f.value);
-    });
+    v.customFields.forEach(f => addVehicleCustomField(f.label, f.value));
   }
 
   document.getElementById('vehicleModalOverlay').classList.add('active');
@@ -124,65 +146,6 @@ function closeVehicleModal() {
   document.getElementById('vehicleModalOverlay').classList.remove('active');
   vehCroppedBlob = null;
   if (vehCropper) { vehCropper.destroy(); vehCropper = null; }
-}
-
-// ===== SAVE VEHICLE =====
-document.getElementById('vehicleForm').addEventListener('submit', async (e) => {
-  e.preventDefault();
-
-  let photoUrl = '';
-  if (vehCroppedBlob) {
-    const base64 = await blobToBase64(vehCroppedBlob);
-    const uploadRes = await fetch('http://localhost:3000/api/upload', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ image: base64 })
-    });
-    const uploadData = await uploadRes.json();
-    photoUrl = uploadData.photoUrl;
-    vehCroppedBlob = null;
-  }
-
-  const customFields = [];
-  document.querySelectorAll('.custom-field-row').forEach(row => {
-    const label = row.querySelector('.custom-label').value.trim();
-    const value = row.querySelector('.custom-value').value.trim();
-    if (label) customFields.push({ label, value });
-  });
-
-  const id = document.getElementById('vehicleId').value;
-  const payload = {
-    vehicleId: document.getElementById('vehVehicleId').value.trim(),
-    name: document.getElementById('vehName').value.trim(),
-    plate: document.getElementById('vehPlate').value.trim(),
-    type: document.getElementById('vehType').value,
-    driver: document.getElementById('vehDriver').value.trim(),
-    regDate: document.getElementById('vehRegDate').value,
-    insuranceExpiry: document.getElementById('vehInsuranceExpiry').value,
-    status: document.getElementById('vehStatus').value,
-    customFields
-  };
-
-  if (photoUrl) payload.photo = photoUrl;
-
-  const method = id ? 'PUT' : 'POST';
-  const url = id ? `${VAPI}/${id}` : VAPI;
-
-  await fetch(url, {
-    method,
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload)
-  });
-
-  closeVehicleModal();
-  loadVehicles();
-});
-
-// ===== DELETE VEHICLE =====
-async function deleteVehicle(id) {
-  if (!confirm('Delete this vehicle?')) return;
-  await fetch(`${VAPI}/${id}`, { method: 'DELETE' });
-  loadVehicles();
 }
 
 // ===== CUSTOM FIELDS =====
@@ -271,11 +234,67 @@ document.addEventListener('DOMContentLoaded', () => {
   initVehicleCropper();
   loadVehicles();
 
-  // Check if redirected from detail page for editing
   const params = new URLSearchParams(window.location.search);
   const editId = params.get('edit');
   if (editId) {
-    // Wait for vehicles to load then open edit modal
     setTimeout(() => openEditVehicleModal(editId), 500);
   }
+
+  // ===== SAVE VEHICLE =====
+  document.getElementById('vehicleForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    let photoUrl = '';
+    if (vehCroppedBlob) {
+      const base64 = await blobToBase64(vehCroppedBlob);
+      const uploadRes = await fetch('http://localhost:3000/api/upload', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ image: base64 })
+      });
+      const uploadData = await uploadRes.json();
+      photoUrl = uploadData.photoUrl;
+      vehCroppedBlob = null;
+    }
+
+    const customFields = [];
+    document.querySelectorAll('.custom-field-row').forEach(row => {
+      const label = row.querySelector('.custom-label').value.trim();
+      const value = row.querySelector('.custom-value').value.trim();
+      if (label) customFields.push({ label, value });
+    });
+
+    const id = document.getElementById('vehicleId').value;
+    const payload = {
+      vehicleId: document.getElementById('vehVehicleId').value.trim(),
+      name: document.getElementById('vehName').value.trim(),
+      plate: document.getElementById('vehPlate').value.trim(),
+      type: document.getElementById('vehType').value,
+      driver: document.getElementById('vehDriver').value.trim(),
+      regDate: document.getElementById('vehRegDate').value,
+      insuranceProvider: document.getElementById('vehInsuranceProvider').value.trim(),
+      policyNumber: document.getElementById('vehPolicyNumber').value.trim(),
+      insuranceStartDate: document.getElementById('vehInsuranceStartDate').value,
+      insuranceExpiry: document.getElementById('vehInsuranceExpiry').value,
+      mulkiyaNumber: document.getElementById('vehMulkiyaNumber').value,
+      mulkiyaIssueDate: document.getElementById('vehMulkiyaIssueDate').value,
+      mulkiyaExpiryDate: document.getElementById('vehMulkiyaExpiryDate').value,
+      status: document.getElementById('vehStatus').value,
+      customFields
+    };
+
+    if (photoUrl) payload.photo = photoUrl;
+
+    const method = id ? 'PUT' : 'POST';
+    const url = id ? `${VAPI}/${id}` : VAPI;
+
+    await fetch(url, {
+      method,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    closeVehicleModal();
+    loadVehicles();
+  });
 });
