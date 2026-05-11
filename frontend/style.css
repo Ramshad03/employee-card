@@ -592,3 +592,33 @@ body {
   margin-top: 6px;
   padding-left: 18px;
 }
+/* ===== NAV TAB GROUP ===== */
+.nav-tab-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nav-tab-group a {
+  color: #ccc;
+  text-decoration: none;
+  font-weight: 500;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: color 0.2s;
+}
+
+.nav-tab-group a:hover {
+  color: #fff;
+}
+
+.nav-tab-group a.active {
+  color: #e94560;
+  font-weight: 700;
+}
+
+.nav-separator {
+  color: #555;
+  font-size: 16px;
+  user-select: none;
+}

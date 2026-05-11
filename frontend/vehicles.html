@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Vehicles</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs@1.5.13/dist/cropper.min.css"/>
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="nav-brand">🏢 Employee Card System</div>
+    <ul class="nav-links">
+      <li class="nav-tab-group">
+        <a href="employees.html">Employees</a>
+        <span class="nav-separator">|</span>
+        <a href="vehicles.html" class="active">Vehicle</a>
+      </li>
+    </ul>
+  </nav>
+
+  <div class="page-header">
+    <h2>Vehicle Directory</h2>
+    <div class="header-actions">
+      <input type="text" id="searchInput" placeholder="Search vehicles..." />
+      <button class="btn-primary" onclick="openAddVehicleModal()">+ Add Vehicle</button>
+      <button class="btn-secondary" onclick="exportVehicleCSV()">📥 Export CSV</button>
+    </div>
+  </div>
+
+  <div class="employee-grid" id="vehicleGrid"></div>
+
+  <!-- Add/Edit Vehicle Modal -->
+  <div class="modal-overlay" id="vehicleModalOverlay">
+    <div class="modal">
+      <h3 id="vehicleModalTitle">Add Vehicle</h3>
+      <form id="vehicleForm">
+        <input type="hidden" id="vehicleId" />
+
+        <div class="form-group">
+          <label>Vehicle ID</label>
+          <input type="text" id="vehVehicleId" placeholder="e.g. VH001" required />
+        </div>
+        <div class="form-group">
+          <label>Vehicle Name / Model</label>
+          <input type="text" id="vehName" placeholder="e.g. Toyota Hilux" required />
+        </div>
+        <div class="form-group">
+          <label>License Plate</label>
+          <input type="text" id="vehPlate" placeholder="e.g. A 12345" />
+        </div>
+        <div class="form-group">
+          <label>Type</label>
+          <select id="vehType">
+            <option value="">Select type</option>
+            <option value="Car">Car</option>
+            <option value="Truck">Truck</option>
+            <option value="Van">Van</option>
+            <option value="Bus">Bus</option>
+            <option value="Motorcycle">Motorcycle</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Assigned Driver</label>
+          <input type="text" id="vehDriver" placeholder="Enter driver name" />
+        </div>
+        <div class="form-group">
+          <label>Registration Date</label>
+          <input type="date" id="vehRegDate" />
+        </div>
+        <div class="form-group">
+          <label>Insurance Expiry</label>
+          <input type="date" id="vehInsuranceExpiry" />
+        </div>
+        <div class="form-group">
+          <label>Status</label>
+          <select id="vehStatus">
+            <option value="Active">Active</option>
+            <option value="In Service">In Service</option>
+            <option value="Under Maintenance">Under Maintenance</option>
+            <option value="Inactive">Inactive</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Photo</label>
+          <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+            <input type="file" id="vehPhoto" accept="image/*" />
+          </div>
+          <div id="vehCropContainer" style="display:none; margin-top:10px;">
+            <img id="vehCropImage" style="max-width:100%; display:block;" />
+            <button type="button" class="btn-primary" id="vehCropBtn" style="margin-top:10px;">✂️ Crop & Use Photo</button>
+          </div>
+          <img id="vehCroppedPreview" style="display:none; width:120px; height:80px; border-radius:8px; object-fit:cover; border:3px solid #e94560; margin-top:10px;" />
+        </div>
+
+        <div id="vehCustomFieldsContainer"></div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn-add-field" onclick="addVehicleCustomField()">+ Add Field</button>
+          <button type="submit" class="btn-primary" id="vehSaveBtn">Save</button>
+          <button type="button" class="btn-secondary" onclick="closeVehicleModal()">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <p>© 2026 Employee Card System. All rights reserved.</p>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.5.13/dist/cropper.min.js"></script>
+  <script src="vehicle-app.js"></script>
+</body>
+</html>

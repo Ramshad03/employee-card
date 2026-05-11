@@ -6,6 +6,7 @@ const fs = require('fs');
 const app = express();
 const PORT = 3000;
 const DATA_FILE = path.join(__dirname, 'employees.json');
+const VEHICLES_FILE = path.join(__dirname, 'vehicles.json');
 
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
@@ -27,6 +28,20 @@ function readEmployees() {
 // Helper: write employees
 function writeEmployees(employees) {
   fs.writeFileSync(DATA_FILE, JSON.stringify({ employees }, null, 2));
+}
+
+// Helper: read vehicles
+function readVehicles() {
+  if (!fs.existsSync(VEHICLES_FILE)) {
+    fs.writeFileSync(VEHICLES_FILE, JSON.stringify({ vehicles: [] }, null, 2));
+  }
+  const data = fs.readFileSync(VEHICLES_FILE, 'utf-8');
+  return JSON.parse(data).vehicles;
+}
+
+// Helper: write vehicles
+function writeVehicles(vehicles) {
+  fs.writeFileSync(VEHICLES_FILE, JSON.stringify({ vehicles }, null, 2));
 }
 
 // POST upload photo - store as base64
@@ -92,6 +107,47 @@ app.get('/api/employees/export', (req, res) => {
   res.setHeader('Content-Type', 'text/csv');
   res.setHeader('Content-Disposition', 'attachment; filename=employees.csv');
   res.send(csv);
+});
+
+// GET all vehicles
+app.get('/api/vehicles', (req, res) => {
+  const vehicles = readVehicles();
+  res.json(vehicles);
+});
+
+// GET single vehicle
+app.get('/api/vehicles/:id', (req, res) => {
+  const vehicles = readVehicles();
+  const vehicle = vehicles.find(v => v.id === req.params.id);
+  if (!vehicle) return res.status(404).json({ error: 'Vehicle not found' });
+  res.json(vehicle);
+});
+
+// POST new vehicle
+app.post('/api/vehicles', (req, res) => {
+  const vehicles = readVehicles();
+  const newVehicle = { id: Date.now().toString(), ...req.body };
+  vehicles.push(newVehicle);
+  writeVehicles(vehicles);
+  res.status(201).json(newVehicle);
+});
+
+// PUT update vehicle
+app.put('/api/vehicles/:id', (req, res) => {
+  let vehicles = readVehicles();
+  const index = vehicles.findIndex(v => v.id === req.params.id);
+  if (index === -1) return res.status(404).json({ error: 'Vehicle not found' });
+  vehicles[index] = { ...vehicles[index], ...req.body };
+  writeVehicles(vehicles);
+  res.json(vehicles[index]);
+});
+
+// DELETE vehicle
+app.delete('/api/vehicles/:id', (req, res) => {
+  let vehicles = readVehicles();
+  vehicles = vehicles.filter(v => v.id !== req.params.id);
+  writeVehicles(vehicles);
+  res.json({ message: 'Vehicle deleted' });
 });
 
 // Global error handler
