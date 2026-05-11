@@ -13,18 +13,13 @@ async function loadEmployees() {
 }
 
 function getStatusColor(emp) {
-  if (!emp.joinDate || !emp.leaveDays) return '#e94560';
-
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  const deadline = new Date(emp.joinDate);
-  deadline.setDate(deadline.getDate() + 365);
-
+  // Check if on leave → grey
   if (emp.leaveGrantedDate && emp.leaveGrantedDate !== 'null') {
     const grantedDate = new Date(emp.leaveGrantedDate);
     grantedDate.setHours(0, 0, 0, 0);
-
     let leaveEndDate;
     if (emp.extendLeaveUntil && emp.extendLeaveUntil !== 'null') {
       leaveEndDate = new Date(emp.extendLeaveUntil);
@@ -32,21 +27,21 @@ function getStatusColor(emp) {
       leaveEndDate.setDate(leaveEndDate.getDate() + 1);
     } else {
       leaveEndDate = new Date(grantedDate);
-      leaveEndDate.setDate(leaveEndDate.getDate() + emp.leaveDays);
+      leaveEndDate.setDate(leaveEndDate.getDate() + (emp.leaveDays || 0));
     }
-
     if (today >= grantedDate && today < leaveEndDate) return '#888888';
-
-    if (today >= leaveEndDate) {
-      const nextDeadline = new Date(leaveEndDate);
-      nextDeadline.setDate(nextDeadline.getDate() + 365);
-      return today > nextDeadline ? '#e94560' : '#28a745';
-    }
-
-    return today > deadline ? '#e94560' : '#28a745';
   }
 
-  return today > deadline ? '#e94560' : '#28a745';
+  // Visa expiry logic
+  if (!emp.visaDate) return '#27ae60';
+  const expiry = new Date(emp.visaDate);
+  expiry.setHours(0, 0, 0, 0);
+  const daysLeft = Math.round((expiry - today) / (1000 * 60 * 60 * 24));
+
+  if (daysLeft < 0)   return '#e94560'; // expired → red
+  if (daysLeft <= 45) return '#e67e22'; // 45 days → orange
+  if (daysLeft <= 90) return '#f1c40f'; // 3 months → yellow
+  return '#27ae60';                     // safe → green
 }
 
 function renderCards(employees) {

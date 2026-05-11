@@ -55,9 +55,22 @@ function renderVehicleCards(vehicles) {
     }
     const mulkiyaColor = v.mulkiyaNumber ? getMulkiyaColor(v.mulkiyaExpiryDate) : null;
 
-    const bookmarkHTML = mulkiyaColor ? `
-      <div style="position:absolute; top:0; left:12px; width:22px; height:32px; background:${mulkiyaColor}; clip-path:polygon(0 0, 100% 0, 100% 85%, 50% 100%, 0 85%); z-index:2;"></div>
-    ` : '';
+    function getInsuranceColor(expiryDate) {
+      if (!expiryDate) return null;
+      const today = new Date(); today.setHours(0,0,0,0);
+      const expiry = new Date(expiryDate); expiry.setHours(0,0,0,0);
+      const daysLeft = Math.round((expiry - today) / (1000 * 60 * 60 * 24));
+      if (daysLeft < 0)   return '#e94560';
+      if (daysLeft <= 45) return '#e67e22';
+      if (daysLeft <= 90) return '#f1c40f';
+      return '#27ae60';
+    }
+    const insuranceColor = v.insuranceExpiry ? getInsuranceColor(v.insuranceExpiry) : null;
+
+    const bookmarkHTML = `
+      ${mulkiyaColor ? `<div style="position:absolute; top:0; left:12px; width:22px; height:32px; background:${mulkiyaColor}; clip-path:polygon(0 0, 100% 0, 100% 85%, 50% 100%, 0 85%); z-index:2; display:flex; align-items:flex-start; justify-content:center; padding-top:4px;"><span style="color:#fff; font-size:10px; font-weight:700; line-height:1;">M</span></div>` : ''}
+      ${insuranceColor ? `<div style="position:absolute; top:0; left:38px; width:22px; height:32px; background:${insuranceColor}; clip-path:polygon(0 0, 100% 0, 100% 85%, 50% 100%, 0 85%); z-index:2; opacity:0.7; display:flex; align-items:flex-start; justify-content:center; padding-top:4px;"><span style="color:#fff; font-size:10px; font-weight:700; line-height:1;">I</span></div>` : ''}
+    `;
 
     const photoHTML = v.photo
       ? `<img src="${v.photo}" alt="${v.name}" style="width:100%; height:110px; object-fit:cover; border-radius:8px; border:3px solid ${statusColor};" />`
@@ -89,8 +102,26 @@ function getVehicleStatusColor(status) {
   }
 }
 
+// ===== LOAD EMPLOYEES INTO DRIVER SELECT =====
+async function loadEmployeesIntoDriverSelect(currentVal = '') {
+  const select = document.getElementById('vehDriver');
+  if (!select) return;
+  try {
+    const res = await fetch('http://localhost:3000/api/employees');
+    const employees = await res.json();
+    select.innerHTML = '<option value="">Select employee...</option>';
+    employees.forEach(e => {
+      const opt = document.createElement('option');
+      opt.value = e.name;
+      opt.textContent = `${e.name} (${e.employeeId || ''})`;
+      if (e.name === currentVal) opt.selected = true;
+      select.appendChild(opt);
+    });
+  } catch(err) {}
+}
+
 // ===== OPEN ADD MODAL =====
-function openAddVehicleModal() {
+async function openAddVehicleModal() {
   document.getElementById('vehicleModalTitle').textContent = 'Add Vehicle';
   document.getElementById('vehicleForm').reset();
   document.getElementById('vehicleId').value = '';
@@ -99,6 +130,7 @@ function openAddVehicleModal() {
   document.getElementById('vehCustomFieldsContainer').innerHTML = '';
   vehCroppedBlob = null;
   if (vehCropper) { vehCropper.destroy(); vehCropper = null; }
+  await loadEmployeesIntoDriverSelect('');
   document.getElementById('vehicleModalOverlay').classList.add('active');
 }
 
@@ -113,7 +145,7 @@ async function openEditVehicleModal(id) {
   document.getElementById('vehName').value = v.name || '';
   document.getElementById('vehPlate').value = v.plate || '';
   document.getElementById('vehType').value = v.type || '';
-  document.getElementById('vehDriver').value = v.driver || '';
+  await loadEmployeesIntoDriverSelect(v.driver || '');
   document.getElementById('vehRegDate').value = v.regDate || '';
   document.getElementById('vehInsuranceProvider').value = v.insuranceProvider || '';
   document.getElementById('vehPolicyNumber').value = v.policyNumber || '';
@@ -123,6 +155,8 @@ async function openEditVehicleModal(id) {
   document.getElementById('vehMulkiyaIssueDate').value = v.mulkiyaIssueDate || '';
   document.getElementById('vehMulkiyaExpiryDate').value = v.mulkiyaExpiryDate || '';
   document.getElementById('vehStatus').value = v.status || 'Active';
+
+
 
   const preview = document.getElementById('vehCroppedPreview');
   if (v.photo) { preview.src = v.photo; preview.style.display = 'block'; }
