@@ -45,18 +45,14 @@ function renderVehicleCards(vehicles) {
       : `<div style="width:100px; height:70px; border-radius:8px; background:${statusColor}; display:flex; align-items:center; justify-content:center; font-size:28px;">🚗</div>`;
 
     return `
-      <div class="employee-card">
+      <div class="employee-card" onclick="window.location.href='vehicle-detail.html?id=${v.id}'" style="cursor:pointer;">
         <div class="card-photo">
           ${photoHTML}
         </div>
         <div class="card-info">
           <h3 style="font-size:18px; font-weight:700; color:#1a1a2e; margin:0 0 4px 0;">${v.vehicleId || ''}</h3>
-          <p style="font-size:15px; font-weight:600; color:#1a1a2e; margin:0 0 4px 0;">${v.name || ''}</p>
-          <p style="font-size:13px; color:#999; margin:0;">${v.plate || ''}</p>
-        </div>
-        <div class="card-actions">
-          <button class="btn-edit" onclick="openEditVehicleModal('${v.id}')">✏️ Edit</button>
-          <button class="btn-delete" onclick="deleteVehicle('${v.id}')">🗑️ Delete</button>
+          <p style="font-size:15px; font-weight:700; color:#1a1a2e; margin:0 0 4px 0;">${v.name || ''}</p>
+          <p style="font-size:13px; font-weight:700; color:#999; margin:0;">${v.plate || ''}</p>
         </div>
       </div>`;
   }).join('');
@@ -274,4 +270,12 @@ function initVehicleCropper() {
 document.addEventListener('DOMContentLoaded', () => {
   initVehicleCropper();
   loadVehicles();
+
+  // Check if redirected from detail page for editing
+  const params = new URLSearchParams(window.location.search);
+  const editId = params.get('edit');
+  if (editId) {
+    // Wait for vehicles to load then open edit modal
+    setTimeout(() => openEditVehicleModal(editId), 500);
+  }
 });
