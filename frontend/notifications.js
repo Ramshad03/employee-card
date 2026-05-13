@@ -139,7 +139,23 @@ function markAsRead(id, el) {
 
 function toggleNotifPanel() {
   const panel = document.getElementById('notifPanel');
-  if (panel) panel.classList.toggle('open');
+  if (!panel) return;
+
+  if (!panel.classList.contains('open')) {
+    const btn = document.querySelector('#notifWrapper .notif-btn');
+    if (btn) {
+      const rect = btn.getBoundingClientRect();
+      const panelWidth = 330;
+      const rightOffset = Math.max(8, window.innerWidth - rect.right);
+      const leftEdge = window.innerWidth - rightOffset - panelWidth;
+      const clampedRight = leftEdge < 8
+        ? window.innerWidth - panelWidth - 8
+        : rightOffset;
+      panel.style.right = clampedRight + 'px';
+      panel.style.top = (rect.bottom + 12) + 'px';
+    }
+  }
+  panel.classList.toggle('open');
 }
 
 document.addEventListener('click', (e) => {

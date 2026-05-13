@@ -1,6 +1,7 @@
 const API = 'http://localhost:3000/api';
 
 let allEmployees = [];
+let activeEmployeeFilter = 'all';
 let cropper = null;
 let croppedBlob = null;
 let webcamStream = null;
@@ -42,6 +43,33 @@ function getStatusColor(emp) {
   if (daysLeft <= 45) return '#e67e22'; // 45 days → orange
   if (daysLeft <= 90) return '#f1c40f'; // 3 months → yellow
   return '#27ae60';                     // safe → green
+}
+
+function getEmployeeStatusKey(emp) {
+  const color = getStatusColor(emp);
+  if (color === '#888888') return 'on-leave';
+  if (color === '#e94560') return 'visa-expired';
+  if (color === '#e67e22') return 'visa-expiring';
+  if (color === '#f1c40f') return 'visa-due';
+  return 'active';
+}
+
+function employeeMatchesFilter(emp) {
+  return activeEmployeeFilter === 'all' || getEmployeeStatusKey(emp) === activeEmployeeFilter;
+}
+
+function applyEmployeeFilters() {
+  const searchInput = document.getElementById('searchInput');
+  const query = searchInput ? searchInput.value.toLowerCase() : '';
+  const filtered = allEmployees.filter(emp => {
+    const matchesSearch =
+      (emp.name || '').toLowerCase().includes(query) ||
+      (emp.employeeId || '').toLowerCase().includes(query) ||
+      (emp.role || '').toLowerCase().includes(query) ||
+      (emp.department || '').toLowerCase().includes(query);
+    return matchesSearch && employeeMatchesFilter(emp);
+  });
+  renderCards(filtered);
 }
 
 function renderCards(employees) {
@@ -237,15 +265,31 @@ function initCropper() {
 function initSearch() {
   const searchInput = document.getElementById('searchInput');
   if (searchInput) {
-    searchInput.addEventListener('input', () => {
-      const query = searchInput.value.toLowerCase();
-      const filtered = allEmployees.filter(emp =>
-        emp.name?.toLowerCase().includes(query) ||
-        emp.employeeId?.toLowerCase().includes(query) ||
-        emp.role?.toLowerCase().includes(query) ||
-        emp.department?.toLowerCase().includes(query)
-      );
-      renderCards(filtered);
+    searchInput.addEventListener('input', applyEmployeeFilters);
+  }
+
+  const filterToggle = document.getElementById('employeeFilterToggle');
+  const filterMenu = document.getElementById('employeeFilterMenu');
+  if (filterToggle && filterMenu) {
+    filterToggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      filterMenu.classList.toggle('active');
+    });
+
+    filterMenu.querySelectorAll('button[data-filter]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        activeEmployeeFilter = btn.dataset.filter;
+        filterMenu.querySelectorAll('button').forEach(item => item.classList.remove('active'));
+        btn.classList.add('active');
+        filterMenu.classList.remove('active');
+        applyEmployeeFilters();
+      });
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!filterMenu.contains(e.target) && !filterToggle.contains(e.target)) {
+        filterMenu.classList.remove('active');
+      }
     });
   }
 }
@@ -275,6 +319,8 @@ function openEditModal(id) {
   document.getElementById('empPhone').value = emp.phone || '';
   document.getElementById('empDepartment').value = emp.department || '';
   document.getElementById('empJoinDate').value = emp.joinDate || '';
+  document.getElementById('empGender').value = emp.gender || '';
+  document.getElementById('empMaritalStatus').value = emp.maritalStatus || '';
   document.getElementById('empLeaveDays').value = emp.leaveDays || '';
   document.getElementById('empLeaveGrantedDate').value = emp.leaveGrantedDate || '';
   document.getElementById('empExtendLeaveUntil').value = emp.extendLeaveUntil || '';
@@ -345,6 +391,8 @@ function initForm() {
         phone: document.getElementById('empPhone').value,
         department: document.getElementById('empDepartment').value,
         joinDate: document.getElementById('empJoinDate').value,
+        gender: document.getElementById('empGender').value,
+        maritalStatus: document.getElementById('empMaritalStatus').value,
         leaveDays: parseInt(document.getElementById('empLeaveDays').value) || 0,
         leaveGrantedDate: document.getElementById('empLeaveGrantedDate').value || null,
         extendLeaveUntil: document.getElementById('empExtendLeaveUntil').value || null,

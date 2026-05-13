@@ -107,9 +107,9 @@ body { background: var(--bg) !important; color: var(--text-primary) !important; 
 
 .notif-panel {
   display: none;
-  position: absolute;
-  top: calc(100% + 12px);
-  right: 0;
+  position: fixed;
+  top: 60px;
+  right: 20px;
   width: 330px;
   background: var(--modal-bg, #fff);
   border-radius: 12px;
@@ -147,7 +147,6 @@ body { background: var(--bg) !important; color: var(--text-primary) !important; 
 .notif-item:last-child { border-bottom: none; }
 .notif-item:hover { background: var(--dropdown-bg, #f4f6f8); }
 
-/* ── Unread state ── */
 .notif-item.notif-unread {
   background: rgba(233, 69, 96, 0.06);
   border-left: 3px solid #e94560;
@@ -328,6 +327,94 @@ body {
   border-color: #e94560;
 }
 
+.search-filter-wrap {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+}
+
+.search-filter-wrap input {
+  width: 280px;
+  padding-right: 82px;
+}
+
+.search-filter-btn {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  bottom: 4px;
+  border: 0;
+  border-left: 1px solid #ddd;
+  border-radius: 0 6px 6px 0;
+  background: #f4f6f8;
+  color: #1a1a2e;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 0 12px;
+  cursor: pointer;
+}
+
+.search-filter-btn:hover {
+  background: #eceff3;
+}
+
+.search-filter-menu {
+  display: none;
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 220px;
+  background: var(--modal-bg, #fff);
+  border: 1px solid var(--border, #eee);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.16);
+  padding: 6px;
+  z-index: 150;
+}
+
+.search-filter-menu.active {
+  display: block;
+}
+
+.search-filter-menu button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 0;
+  background: transparent;
+  color: var(--text-primary, #1a1a2e);
+  border-radius: 6px;
+  padding: 9px 10px;
+  text-align: left;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.search-filter-menu button:hover,
+.search-filter-menu button.active {
+  background: var(--dropdown-bg, #f4f6f8);
+}
+
+.filter-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+  background: #bbb;
+  border: 1px solid rgba(0,0,0,0.08);
+}
+
+.filter-dot.all { background: linear-gradient(135deg, #27ae60 0 24%, #f1c40f 24% 49%, #e67e22 49% 74%, #e94560 74%); }
+.filter-dot.green { background: #27ae60; }
+.filter-dot.red { background: #e94560; }
+.filter-dot.orange { background: #e67e22; }
+.filter-dot.yellow { background: #f1c40f; }
+.filter-dot.grey { background: #888888; }
+.filter-dot.blue { background: #2980b9; }
+
 /* ===== EMPLOYEE GRID ===== */
 .employee-grid {
   display: flex;
@@ -437,7 +524,8 @@ body {
   font-weight: 600;
 }
 
-.form-group input {
+.form-group input,
+.form-group select {
   width: 100%;
   padding: 10px 14px;
   border: 2px solid #ddd;
@@ -447,7 +535,8 @@ body {
   transition: border 0.3s;
 }
 
-.form-group input:focus {
+.form-group input:focus,
+.form-group select:focus {
   border-color: #e94560;
 }
 
@@ -890,4 +979,28 @@ body.dark-theme .employee-card p[style*="font-weight:700"][style*="color:#999"] 
 /* ===== VEHICLE CARD PLATE GREY IN LIGHT THEME ===== */
 .employee-card p[style*="color:#999"] {
   color: #6f6f6f !important;
+}
+
+/* ===== NOTIFICATION BELL ===== */
+.notif-bell {
+  background: none;
+  border: 1.5px solid rgba(255,255,255,0.3);
+  border-radius: 20px;
+  padding: 5px 12px;
+  color: #fff;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.2s;
+}
+.notif-bell:hover { background: rgba(255,255,255,0.1); }
+
+body.dark-theme #notifDropdown {
+  background: #1e1e35 !important;
+  border: 1px solid #3a3a5e;
+}
+body.dark-theme #notifDropdown [style*="color:#1a1a2e"] {
+  color: #f0f0f0 !important;
+}
+body.dark-theme #notifDropdown [style*="border-bottom:1px solid #eee"] {
+  border-bottom-color: #3a3a5e !important;
 }

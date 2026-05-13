@@ -36,7 +36,18 @@
   <div class="page-header">
     <h2>Employee Directory</h2>
     <div class="header-actions">
-      <input type="text" id="searchInput" placeholder="Search employees..." />
+      <div class="search-filter-wrap">
+        <input type="text" id="searchInput" placeholder="Search employees..." />
+        <button type="button" class="search-filter-btn" id="employeeFilterToggle" title="Filter employees">Filter</button>
+        <div class="search-filter-menu" id="employeeFilterMenu">
+          <button type="button" class="active" data-filter="all"><span class="filter-dot all"></span>All employees</button>
+          <button type="button" data-filter="active"><span class="filter-dot green"></span>Active</button>
+          <button type="button" data-filter="visa-expired"><span class="filter-dot red"></span>Visa Expired</button>
+          <button type="button" data-filter="visa-expiring"><span class="filter-dot orange"></span>Visa Expiring</button>
+          <button type="button" data-filter="visa-due"><span class="filter-dot yellow"></span>Visa Due Soon</button>
+          <button type="button" data-filter="on-leave"><span class="filter-dot grey"></span>On Leave</button>
+        </div>
+      </div>
       <button class="btn-primary" onclick="openAddModal()">+ Add Employee</button>
       <button class="btn-secondary" onclick="exportCSV()">📥 Export CSV</button>
     </div>
@@ -60,8 +71,8 @@
           <input type="text" id="empName" placeholder="Enter full name" required />
         </div>
         <div class="form-group">
-          <label>Role</label>
-          <input type="text" id="empRole" placeholder="Enter role" />
+          <label>Department</label>
+          <input type="text" id="empDepartment" placeholder="Enter Department" />
         </div>
         <div class="form-group">
           <label>Email</label>
@@ -72,13 +83,34 @@
           <input type="text" id="empPhone" placeholder="Enter phone number" />
         </div>
         <div class="form-group">
-          <label>Department</label>
-          <input type="text" id="empDepartment" placeholder="Enter department" />
+          <label>Role</label>
+          <input type="text" id="empRole" placeholder="Enter role" />
         </div>
         <div class="form-group">
           <label>Join Date</label>
           <input type="date" id="empJoinDate" />
         </div>
+        <div class="form-group">
+          <label>Gender</label>
+          <select id="empGender">
+            <option value="">Select gender</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Family Status</label>
+          <select id="empMaritalStatus" onchange="toggleFamilyDoc(this.value)">
+            <option value="">Select</option>
+            <option value="Yes">Yes</option>
+            <option value="No">No</option>
+          </select>
+        </div>
+        <div class="form-group" id="familyDocGroup" style="display:none;">
+          <label>Family Document (PDF/Image)</label>
+          <input type="file" id="empFamilyDoc" accept="image/*,.pdf" />
+        </div>
+        <input type="hidden" id="existingFamilyDoc" />
         <div class="form-group">
           <label>Annual Leave Days</label>
           <input type="number" id="empLeaveDays" placeholder="e.g. 60" min="1" required />

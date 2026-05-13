@@ -12,23 +12,89 @@ function blobToBase64(blob) {
 
 let vehCropper = null;
 let vehCroppedBlob = null;
+let allVehicles = [];
+let activeVehicleFilter = 'all';
 
 // ===== LOAD VEHICLES =====
 async function loadVehicles() {
   const res = await fetch(VAPI);
-  const vehicles = await res.json();
-  renderVehicleCards(vehicles);
+  allVehicles = await res.json();
+  applyVehicleFilters();
+}
 
-  document.getElementById('searchInput').addEventListener('input', (e) => {
-    const q = e.target.value.toLowerCase();
-    const filtered = vehicles.filter(v =>
+function getExpiryStatus(expiryDate) {
+  if (!expiryDate) return null;
+  const today = new Date(); today.setHours(0,0,0,0);
+  const expiry = new Date(expiryDate); expiry.setHours(0,0,0,0);
+  const daysLeft = Math.round((expiry - today) / (1000 * 60 * 60 * 24));
+  if (daysLeft < 0)   return { key: 'expired', color: '#e94560' };
+  if (daysLeft <= 45) return { key: 'expiring', color: '#e67e22' };
+  if (daysLeft <= 90) return { key: 'due', color: '#f1c40f' };
+  return                     { key: 'active', color: '#27ae60' };
+}
+
+function vehicleMatchesFilter(v) {
+  const status = v.status || 'Active';
+  const mulkiyaStatus = v.mulkiyaNumber ? getExpiryStatus(v.mulkiyaExpiryDate) : null;
+  const insuranceStatus = v.insuranceExpiry ? getExpiryStatus(v.insuranceExpiry) : null;
+
+  switch (activeVehicleFilter) {
+    case 'active': return status === 'Active';
+    case 'in-service': return status === 'In Service';
+    case 'maintenance': return status === 'Under Maintenance';
+    case 'inactive': return status === 'Inactive';
+    case 'mulkiya-expired': return mulkiyaStatus?.key === 'expired';
+    case 'insurance-expired': return insuranceStatus?.key === 'expired';
+    case 'documents-expiring': return mulkiyaStatus?.key === 'expiring' || insuranceStatus?.key === 'expiring';
+    case 'documents-due': return mulkiyaStatus?.key === 'due' || insuranceStatus?.key === 'due';
+    default: return true;
+  }
+}
+
+function applyVehicleFilters() {
+  const searchInput = document.getElementById('searchInput');
+  const q = searchInput ? searchInput.value.toLowerCase() : '';
+  const filtered = allVehicles.filter(v => {
+    const matchesSearch =
       (v.name || '').toLowerCase().includes(q) ||
       (v.vehicleId || '').toLowerCase().includes(q) ||
       (v.plate || '').toLowerCase().includes(q) ||
-      (v.driver || '').toLowerCase().includes(q)
-    );
-    renderVehicleCards(filtered);
+      (v.driver || '').toLowerCase().includes(q);
+    return matchesSearch && vehicleMatchesFilter(v);
   });
+  renderVehicleCards(filtered);
+}
+
+function initVehicleSearchFilters() {
+  const searchInput = document.getElementById('searchInput');
+  if (searchInput) {
+    searchInput.addEventListener('input', applyVehicleFilters);
+  }
+
+  const filterToggle = document.getElementById('vehicleFilterToggle');
+  const filterMenu = document.getElementById('vehicleFilterMenu');
+  if (filterToggle && filterMenu) {
+    filterToggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      filterMenu.classList.toggle('active');
+    });
+
+    filterMenu.querySelectorAll('button[data-filter]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        activeVehicleFilter = btn.dataset.filter;
+        filterMenu.querySelectorAll('button').forEach(item => item.classList.remove('active'));
+        btn.classList.add('active');
+        filterMenu.classList.remove('active');
+        applyVehicleFilters();
+      });
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!filterMenu.contains(e.target) && !filterToggle.contains(e.target)) {
+        filterMenu.classList.remove('active');
+      }
+    });
+  }
 }
 
 // ===== RENDER CARDS =====
@@ -42,34 +108,18 @@ function renderVehicleCards(vehicles) {
   grid.innerHTML = vehicles.map(v => {
     const statusColor = getVehicleStatusColor(v.status);
 
-    // Mulkiya bookmark color
-    function getMulkiyaColor(expiryDate) {
-      if (!expiryDate) return null;
-      const today = new Date(); today.setHours(0,0,0,0);
-      const expiry = new Date(expiryDate); expiry.setHours(0,0,0,0);
-      const daysLeft = Math.round((expiry - today) / (1000 * 60 * 60 * 24));
-      if (daysLeft < 0)   return '#e94560';
-      if (daysLeft <= 45) return '#e67e22';
-      if (daysLeft <= 90) return '#f1c40f';
-      return '#27ae60';
-    }
-    const mulkiyaColor = v.mulkiyaNumber ? getMulkiyaColor(v.mulkiyaExpiryDate) : null;
-
-    function getInsuranceColor(expiryDate) {
-      if (!expiryDate) return null;
-      const today = new Date(); today.setHours(0,0,0,0);
-      const expiry = new Date(expiryDate); expiry.setHours(0,0,0,0);
-      const daysLeft = Math.round((expiry - today) / (1000 * 60 * 60 * 24));
-      if (daysLeft < 0)   return '#e94560';
-      if (daysLeft <= 45) return '#e67e22';
-      if (daysLeft <= 90) return '#f1c40f';
-      return '#27ae60';
-    }
-    const insuranceColor = v.insuranceExpiry ? getInsuranceColor(v.insuranceExpiry) : null;
+    const mulkiyaColor = v.mulkiyaNumber ? getExpiryStatus(v.mulkiyaExpiryDate)?.color : null;
+    const insuranceColor = v.insuranceExpiry ? getExpiryStatus(v.insuranceExpiry)?.color : null;
 
     const bookmarkHTML = `
-      ${mulkiyaColor ? `<div style="position:absolute; top:0; left:12px; width:22px; height:32px; background:${mulkiyaColor}; clip-path:polygon(0 0, 100% 0, 100% 85%, 50% 100%, 0 85%); z-index:2; display:flex; align-items:flex-start; justify-content:center; padding-top:4px;"><span style="color:#fff; font-size:10px; font-weight:700; line-height:1;">M</span></div>` : ''}
-      ${insuranceColor ? `<div style="position:absolute; top:0; left:38px; width:22px; height:32px; background:${insuranceColor}; clip-path:polygon(0 0, 100% 0, 100% 85%, 50% 100%, 0 85%); z-index:2; opacity:0.7; display:flex; align-items:flex-start; justify-content:center; padding-top:4px;"><span style="color:#fff; font-size:10px; font-weight:700; line-height:1;">I</span></div>` : ''}
+      ${mulkiyaColor ? `
+        <div style="position:absolute; top:18px; left:-30px; width:100px; height:22px; background:${mulkiyaColor}; opacity:0.8; transform:rotate(-45deg); z-index:2; display:flex; align-items:center; justify-content:center;">
+          <span style="color:#fff; font-size:10px; font-weight:700; letter-spacing:1px;">M</span>
+        </div>` : ''}
+      ${insuranceColor ? `
+        <div style="position:absolute; top:18px; right:-30px; width:100px; height:22px; background:${insuranceColor}; opacity:0.8; transform:rotate(45deg); z-index:2; display:flex; align-items:center; justify-content:center;">
+          <span style="color:#fff; font-size:10px; font-weight:700; letter-spacing:1px;">I</span>
+        </div>` : ''}
     `;
 
     const photoHTML = v.photo
@@ -77,9 +127,9 @@ function renderVehicleCards(vehicles) {
       : `<div style="width:100%; height:110px; border-radius:8px; background:${statusColor}; display:flex; align-items:center; justify-content:center; font-size:48px;">🚗</div>`;
 
     return `
-      <div class="employee-card" onclick="window.location.href='vehicle-detail.html?id=${v.id}'" style="cursor:pointer;">
+      <div class="employee-card" onclick="window.location.href='vehicle-detail.html?id=${v.id}'" style="cursor:pointer; overflow:hidden; position:relative;">
+        ${bookmarkHTML}
         <div class="card-photo" style="position:relative;">
-          ${bookmarkHTML}
           ${photoHTML}
         </div>
         <div class="card-info">
@@ -204,10 +254,15 @@ function exportVehicleCSV() {
     .then(r => r.json())
     .then(vehicles => {
       if (!vehicles.length) return alert('No vehicles to export.');
-      const headers = ['Vehicle ID', 'Name', 'Plate', 'Type', 'Driver', 'Reg Date', 'Insurance Expiry', 'Status'];
-      const rows = vehicles.map(v => [
-        v.vehicleId, v.name, v.plate, v.type, v.driver, v.regDate, v.insuranceExpiry, v.status
-      ]);
+      const headers = ['Vehicle ID', 'Name', 'Plate', 'Type', 'Driver', 'Fines', 'Reg Date', 'Insurance Expiry', 'Status'];
+      const rows = vehicles.map(v => {
+        const finesSummary = (v.fines && v.fines.length > 0)
+          ? v.fines.map(f => `OMR ${f.amount} (${f.driver || '—'}) [${f.paid ? 'Paid' : 'Pending'}]`).join(' | ')
+          : 'None';
+        return [
+          v.vehicleId, v.name, v.plate, v.type, v.driver, finesSummary, v.regDate, v.insuranceExpiry, v.status
+        ];
+      });
       const csv = [headers, ...rows].map(r => r.map(c => `"${c || ''}"`).join(',')).join('\n');
       const blob = new Blob([csv], { type: 'text/csv' });
       const url = URL.createObjectURL(blob);
@@ -266,6 +321,7 @@ function initVehicleCropper() {
 // ===== INIT =====
 document.addEventListener('DOMContentLoaded', () => {
   initVehicleCropper();
+  initVehicleSearchFilters();
   loadVehicles();
 
   const params = new URLSearchParams(window.location.search);

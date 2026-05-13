@@ -36,7 +36,21 @@
   <div class="page-header">
     <h2>Vehicle Directory</h2>
     <div class="header-actions">
-      <input type="text" id="searchInput" placeholder="Search vehicles..." />
+      <div class="search-filter-wrap">
+        <input type="text" id="searchInput" placeholder="Search vehicles..." />
+        <button type="button" class="search-filter-btn" id="vehicleFilterToggle" title="Filter vehicles">Filter</button>
+        <div class="search-filter-menu vehicle-filter-menu" id="vehicleFilterMenu">
+          <button type="button" class="active" data-filter="all"><span class="filter-dot all"></span>All vehicles</button>
+          <button type="button" data-filter="active"><span class="filter-dot green"></span>Active</button>
+          <button type="button" data-filter="in-service"><span class="filter-dot blue"></span>In Service</button>
+          <button type="button" data-filter="maintenance"><span class="filter-dot orange"></span>Under Maintenance</button>
+          <button type="button" data-filter="inactive"><span class="filter-dot red"></span>Inactive</button>
+          <button type="button" data-filter="mulkiya-expired"><span class="filter-dot red"></span>Mulkiya Expired</button>
+          <button type="button" data-filter="insurance-expired"><span class="filter-dot red"></span>Insurance Expired</button>
+          <button type="button" data-filter="documents-expiring"><span class="filter-dot orange"></span>Documents Expiring</button>
+          <button type="button" data-filter="documents-due"><span class="filter-dot yellow"></span>Documents Due Soon</button>
+        </div>
+      </div>
       <button class="btn-primary" onclick="openAddVehicleModal()">+ Add Vehicle</button>
       <button class="btn-secondary" onclick="exportVehicleCSV()">📥 Export CSV</button>
     </div>
