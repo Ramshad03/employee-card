@@ -189,5 +189,39 @@
       }
     })();
   </script>
+  <!-- Help FAB -->
+<button class="help-fab" onclick="document.getElementById('helpOverlay').classList.add('active')">?</button>
+
+<div class="help-overlay" id="helpOverlay">
+  <div class="help-modal">
+    <h3>🎨 Card Color Guide</h3>
+
+    <div class="help-section">
+      <h4>Card Border Glow — Vehicle Status</h4>
+      <div class="help-row"><span class="help-dot" style="background:#27ae60;"></span> Green — Vehicle is Active</div>
+      <div class="help-row"><span class="help-dot" style="background:#2980b9;"></span> Blue — Vehicle is In Service</div>
+      <div class="help-row"><span class="help-dot" style="background:#e67e22;"></span> Orange — Under Maintenance</div>
+      <div class="help-row"><span class="help-dot" style="background:#e94560;"></span> Red — Vehicle is Inactive</div>
+    </div>
+
+    <div class="help-section">
+      <h4>Top-Left Corner (M) — Mulkiya Status</h4>
+      <div class="help-row"><span class="help-dot" style="background:#27ae60;"></span> Green — Mulkiya valid (90+ days)</div>
+      <div class="help-row"><span class="help-dot" style="background:#f1c40f;"></span> Yellow — Mulkiya due within 90 days</div>
+      <div class="help-row"><span class="help-dot" style="background:#e67e22;"></span> Orange — Mulkiya expiring within 45 days</div>
+      <div class="help-row"><span class="help-dot" style="background:#e94560;"></span> Red — Mulkiya has expired</div>
+    </div>
+
+    <div class="help-section">
+      <h4>Top-Right Corner (I) — Insurance Status</h4>
+      <div class="help-row"><span class="help-dot" style="background:#27ae60;"></span> Green — Insurance valid (90+ days)</div>
+      <div class="help-row"><span class="help-dot" style="background:#f1c40f;"></span> Yellow — Insurance due within 90 days</div>
+      <div class="help-row"><span class="help-dot" style="background:#e67e22;"></span> Orange — Insurance expiring within 45 days</div>
+      <div class="help-row"><span class="help-dot" style="background:#e94560;"></span> Red — Insurance has expired</div>
+    </div>
+
+    <button class="help-close" onclick="document.getElementById('helpOverlay').classList.remove('active')">Got it</button>
+  </div>
+</div>
 </body>
 </html>

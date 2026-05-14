@@ -188,5 +188,33 @@
       }
     })();
   </script>
+  <!-- Help FAB -->
+<button class="help-fab" onclick="document.getElementById('helpOverlay').classList.add('active')">?</button>
+
+<div class="help-overlay" id="helpOverlay">
+  <div class="help-modal">
+    <h3>🎨 Card Color Guide</h3>
+
+    <div class="help-section">
+      <h4>Card Border Glow — Visa Status</h4>
+      <div class="help-row"><span class="help-dot" style="background:#27ae60;"></span> Green — Visa valid (more than 90 days left)</div>
+      <div class="help-row"><span class="help-dot" style="background:#f1c40f;"></span> Yellow — Visa expiring within 90 days</div>
+      <div class="help-row"><span class="help-dot" style="background:#e67e22;"></span> Orange — Visa expiring within 45 days</div>
+      <div class="help-row"><span class="help-dot" style="background:#e94560;"></span> Red — Visa has expired</div>
+      <div class="help-row"><span class="help-dot" style="background:#888888;"></span> Grey — Employee is currently on leave</div>
+    </div>
+
+    <div class="help-section">
+      <h4>Profile Photo Border</h4>
+      <div class="help-row"><span class="help-dot" style="background:#27ae60;"></span> Green — Active & visa valid</div>
+      <div class="help-row"><span class="help-dot" style="background:#f1c40f;"></span> Yellow — Visa due soon</div>
+      <div class="help-row"><span class="help-dot" style="background:#e67e22;"></span> Orange — Visa expiring soon</div>
+      <div class="help-row"><span class="help-dot" style="background:#e94560;"></span> Red — Visa expired</div>
+      <div class="help-row"><span class="help-dot" style="background:#888888;"></span> Grey — On leave</div>
+    </div>
+
+    <button class="help-close" onclick="document.getElementById('helpOverlay').classList.remove('active')">Got it</button>
+  </div>
+</div>
 </body>
 </html>
