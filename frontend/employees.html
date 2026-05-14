@@ -17,19 +17,21 @@
         <span class="nav-separator">|</span>
         <a href="vehicles.html">Vehicle</a>
       </li>
-      <li id="notifWrapper">
-        <button class="notif-btn" onclick="toggleNotifPanel()" title="Notifications">
-          🔔
-          <span class="notif-badge" id="notifBadge" style="display:none;">0</span>
-        </button>
-        <div class="notif-panel" id="notifPanel">
-          <div class="notif-header">Notifications</div>
-          <div class="notif-list" id="notifList">
-            <div class="notif-empty">Loading...</div>
+      <li class="nav-btn-group">
+        <div id="notifWrapper">
+          <button class="notif-btn" onclick="toggleNotifPanel()" title="Notifications">
+            🔔
+            <span class="notif-badge" id="notifBadge" style="display:none;">0</span>
+          </button>
+          <div class="notif-panel" id="notifPanel">
+            <div class="notif-header">Notifications</div>
+            <div class="notif-list" id="notifList">
+              <div class="notif-empty">Loading...</div>
+            </div>
           </div>
         </div>
+        <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">🌙 Dark</button>
       </li>
-      <li><button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">🌙 Dark</button></li>
     </ul>
   </nav>
 
@@ -48,8 +50,8 @@
           <button type="button" data-filter="on-leave"><span class="filter-dot grey"></span>On Leave</button>
         </div>
       </div>
-      <button class="btn-primary" onclick="openAddModal()">+ Add Employee</button>
-      <button class="btn-secondary" onclick="exportCSV()">📥 Export CSV</button>
+      <button class="btn-primary btn-primary-glass" onclick="openAddModal()">+ Add Employee</button>
+      <button class="btn-secondary glass-btn" onclick="exportCSV()">📥 Export CSV</button>
     </div>
   </div>
 

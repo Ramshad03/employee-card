@@ -53,17 +53,23 @@ body { background: var(--bg) !important; color: var(--text-primary) !important; 
 .page-header { background: var(--bg) !important; }
 
 .theme-toggle {
-  background: none;
-  border: 1.5px solid rgba(255,255,255,0.3);
-  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 14px;
   padding: 5px 14px;
   color: #fff;
   cursor: pointer;
   font-size: 13px;
-  transition: all 0.2s;
-  margin-left: 16px;
+  font-weight: 600;
+  transition: all 0.22s ease;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.18);
 }
-.theme-toggle:hover { background: rgba(255,255,255,0.1); }
+.theme-toggle:hover {
+  background: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 14px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.25);
+}
 
 /* ===== NOTIFICATIONS ===== */
 #notifWrapper {
@@ -71,21 +77,36 @@ body { background: var(--bg) !important; color: var(--text-primary) !important; 
   list-style: none;
 }
 
+/* Group notif + theme toggle tightly */
+.nav-btn-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  list-style: none;
+}
+
 .notif-btn {
-  background: none;
-  border: 1.5px solid rgba(255,255,255,0.3);
-  border-radius: 20px;
-  padding: 5px 12px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 14px;
+  padding: 5px 14px;
   color: #fff;
   cursor: pointer;
-  font-size: 16px;
+  font-size: 13px;
+  font-weight: 600;
   position: relative;
-  transition: all 0.2s;
+  transition: all 0.22s ease;
   display: flex;
   align-items: center;
   gap: 4px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.18);
 }
-.notif-btn:hover { background: rgba(255,255,255,0.1); }
+.notif-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 14px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.25);
+}
 
 .notif-badge {
   position: absolute;
@@ -273,6 +294,31 @@ body {
   background-color: #c73652;
 }
 
+/* Glassmorphism variant — clean glass, neutral shadow on hover only */
+.btn-primary-glass {
+  background: linear-gradient(135deg,
+    rgba(233, 69, 96, 0.92) 0%,
+    rgba(210, 50, 78, 0.82) 100%) !important;
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.28) !important;
+  border-radius: 12px !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28) !important;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  transition: all 0.22s ease !important;
+}
+.btn-primary-glass:hover {
+  background: linear-gradient(135deg,
+    rgba(233, 69, 96, 1) 0%,
+    rgba(210, 50, 78, 0.95) 100%) !important;
+  box-shadow:
+    0 4px 14px rgba(0, 0, 0, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.38) !important;
+}
+
 .btn-secondary {
   background-color: #fff;
   color: #1a1a2e;
@@ -340,22 +386,25 @@ body {
 
 .search-filter-btn {
   position: absolute;
-  top: 4px;
-  right: 4px;
-  bottom: 4px;
-  border: 0;
-  border-left: 1px solid #ddd;
-  border-radius: 0 6px 6px 0;
-  background: #f4f6f8;
+  top: 5px;
+  right: 5px;
+  bottom: 5px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(10px) saturate(160%);
+  -webkit-backdrop-filter: blur(10px) saturate(160%);
   color: #1a1a2e;
-  font-size: 0.78rem;
+  font-size: 0.75rem;
   font-weight: 700;
-  padding: 0 12px;
+  padding: 0 10px;
   cursor: pointer;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.4);
+  transition: all 0.22s ease;
 }
-
 .search-filter-btn:hover {
-  background: #eceff3;
+  background: rgba(255, 255, 255, 0.32);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.5);
 }
 
 .search-filter-menu {
@@ -441,6 +490,131 @@ body {
 .employee-card:hover {
   transform: translateY(-6px);
   box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.vehicle-card {
+  isolation: isolate;
+  overflow: visible !important;
+}
+
+.vehicle-card-ribbon {
+  --ribbon-color: #3f8b63;
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 94px;
+  height: 94px;
+  z-index: 6;
+  pointer-events: none;
+  filter: drop-shadow(0 11px 12px rgba(8, 10, 18, 0.28));
+  transform: translate3d(3px, -3px, 0);
+  transition: transform 0.26s ease-out, filter 0.26s ease-out;
+}
+
+.vehicle-card-ribbon::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 0 16px 0 0;
+  background:
+    linear-gradient(145deg, color-mix(in srgb, #ffffff 12%, var(--ribbon-color)) 0%, var(--ribbon-color) 50%, color-mix(in srgb, #000000 18%, var(--ribbon-color)) 100%);
+  clip-path: path("M 20 0 Q 28 0 34 6 L 94 66 Q 88 72 82 78 L 16 12 Q 10 6 20 0 Z");
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    inset -7px -10px 14px rgba(0, 0, 0, 0.14),
+    inset 8px 8px 12px rgba(255, 255, 255, 0.04);
+}
+
+.vehicle-card-ribbon::after {
+  content: "";
+  position: absolute;
+  top: 8px;
+  right: 0;
+  width: 24px;
+  height: 22px;
+  border-radius: 0 12px 2px 6px;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, #000000 22%, var(--ribbon-color)) 0%, color-mix(in srgb, #000000 34%, var(--ribbon-color)) 100%);
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 32% 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    -3px 4px 8px rgba(0, 0, 0, 0.18);
+}
+
+.vehicle-card-ribbon-fold {
+  position: absolute;
+  top: 56px;
+  right: 55px;
+  width: 28px;
+  height: 24px;
+  border-radius: 0 0 8px 0;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, #000000 30%, var(--ribbon-color)) 0%, color-mix(in srgb, #000000 42%, var(--ribbon-color)) 100%);
+  clip-path: polygon(100% 0, 0 0, 100% 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 6px 8px rgba(0, 0, 0, 0.18);
+  transform: translate3d(-2px, 3px, 0);
+  transition: transform 0.26s ease-out, box-shadow 0.26s ease-out;
+}
+
+.vehicle-card-ribbon-surface {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 86px;
+  height: 86px;
+  clip-path: path("M 18 0 Q 26 0 32 6 L 86 60 Q 82 66 76 71 L 15 10 Q 9 4 18 0 Z");
+  background:
+    linear-gradient(145deg, color-mix(in srgb, #ffffff 10%, var(--ribbon-color)) 0%, color-mix(in srgb, #ffffff 4%, var(--ribbon-color)) 24%, color-mix(in srgb, #000000 8%, var(--ribbon-color)) 100%);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.05),
+    inset 0 -10px 14px rgba(0, 0, 0, 0.12),
+    inset 10px 8px 12px rgba(255, 255, 255, 0.03);
+}
+
+.vehicle-card-ribbon-letter {
+  position: absolute;
+  top: 22px;
+  right: 24px;
+  color: rgba(255, 255, 255, 0.96);
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0.08em;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.28);
+  transform: rotate(45deg) scale(0.9);
+  transform-origin: center;
+  opacity: 0;
+  transition: opacity 0.22s ease-out, transform 0.22s ease-out;
+}
+
+.vehicle-card-ribbon[data-ribbon-state="moving"] {
+  --ribbon-color: #3f8b63;
+}
+
+.vehicle-card-ribbon[data-ribbon-state="idle"] {
+  --ribbon-color: #b67a3c;
+}
+
+.vehicle-card:hover .vehicle-card-ribbon,
+.vehicle-card:focus-within .vehicle-card-ribbon {
+  transform: translate3d(0, 0, 0);
+  filter: drop-shadow(0 6px 8px rgba(8, 10, 18, 0.22));
+}
+
+.vehicle-card:hover .vehicle-card-ribbon-fold,
+.vehicle-card:focus-within .vehicle-card-ribbon-fold {
+  transform: translate3d(0, 1px, 0);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    0 3px 5px rgba(0, 0, 0, 0.16);
+}
+
+.vehicle-card:hover .vehicle-card-ribbon-letter,
+.vehicle-card:focus-within .vehicle-card-ribbon-letter {
+  opacity: 1;
+  transform: rotate(45deg) scale(1);
 }
 
 .card-photo-wrapper {
@@ -837,6 +1011,42 @@ body {
   justify-content: flex-end;
 }
 
+/* ===== GLASS BUTTON (iOS glassmorphism) ===== */
+.glass-btn {
+  background: rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.28) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.35) !important;
+  color: #1a1a2e !important;
+  font-weight: 600;
+  transition: all 0.22s ease !important;
+}
+.glass-btn:hover {
+  background: rgba(255, 255, 255, 0.32) !important;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.14), inset 0 1px 0 rgba(255,255,255,0.45) !important;
+  border-color: rgba(255, 255, 255, 0.4) !important;
+}
+body.dark-theme .glass-btn {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border-color: rgba(255, 255, 255, 0.14) !important;
+  color: #f0f0f0 !important;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.1) !important;
+}
+body.dark-theme .glass-btn:hover {
+  background: rgba(255, 255, 255, 0.15) !important;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.15) !important;
+}
+body.dark-theme .search-filter-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.14);
+  color: #f0f0f0;
+}
+body.dark-theme .search-filter-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
 /* ===== FOOTER ===== */
 .footer {
   background-color: #1a1a2e;
@@ -844,6 +1054,9 @@ body {
   text-align: center;
   padding: 20px;
   font-size: 0.9rem;
+  margin-top: auto;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  flex-shrink: 0;
 }
 
 /* ===== RESPONSIVE ===== */
@@ -942,7 +1155,8 @@ body.dark-theme .detail-emp-name { color: #f0f0f0 !important; }
 body.dark-theme .detail-fields .detail-label { color: #aaa !important; }
 body.dark-theme .detail-fields .detail-value { color: #e0e0e0 !important; }
 body.dark-theme .page-header h2 { color: #f0f0f0 !important; }
-body.dark-theme .footer p { color: #888 !important; }
+body.dark-theme .footer p { color: #aaa !important; }
+body.dark-theme .footer { background: #1a1a2e !important; border-top: 1px solid #2a2a3e !important; }
 body.dark-theme .modal-overlay { background: rgba(0,0,0,0.8) !important; }
 
 body.dark-theme #mulkiyaDropdown,
@@ -1003,4 +1217,103 @@ body.dark-theme #notifDropdown [style*="color:#1a1a2e"] {
 }
 body.dark-theme #notifDropdown [style*="border-bottom:1px solid #eee"] {
   border-bottom-color: #3a3a5e !important;
+}
+
+/* ===== PREMIUM GLOW BORDER ===== */
+.employee-card {
+  --status-color: #27ae60;
+  border: 1px solid transparent;
+  overflow: visible;
+  position: relative;
+  z-index: 1;
+  transition: box-shadow 0.4s ease, transform 0.3s ease;
+}
+
+.employee-card::before {
+  display: none;
+}
+
+.employee-card:hover::before {
+  opacity: 0;
+}
+
+.employee-card::after {
+  content: "";
+  position: absolute;
+  inset: 2px;
+  border-radius: inherit;
+  background: transparent;
+  box-shadow:
+    0 0 10px 3px  color-mix(in srgb, var(--status-color) 25%, transparent),
+    0 0 24px 6px  color-mix(in srgb, var(--status-color) 15%, transparent);
+  opacity: 0;
+  pointer-events: none;
+  z-index: -1;
+  transition: opacity 0.35s ease, transform 0.35s ease;
+  transform: scale(0.96);
+}
+
+.employee-card:hover::after {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* employee cards get the soft lift shadow; vehicle cards use their own glow rule below */
+.employee-card:hover:not(.vehicle-card) {
+  z-index: 2;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* ===== VEHICLE CARD: overflow:hidden clips ribbon; glow via card's own box-shadow ===== */
+.vehicle-card {
+  overflow: hidden !important;
+}
+.vehicle-card:hover {
+  z-index: 2;
+  box-shadow:
+    0 0 10px 3px  color-mix(in srgb, var(--status-color) 25%, transparent),
+    0 0 24px 6px  color-mix(in srgb, var(--status-color) 15%, transparent) !important;
+}
+
+/* ===== CORNER RIBBON (rounded triangle) ===== */
+.v-ribbon {
+  position: absolute;
+  top: -28px;
+  width: 56px;
+  height: 56px;
+  background: var(--r-color);
+  border-radius: 6px;
+  transform: rotate(45deg);
+  pointer-events: none;
+  z-index: 3;
+}
+.v-ribbon.left  { left:  -28px; }
+.v-ribbon.right { right: -28px; }
+
+/* Letter positions are computed so they land inside the visible triangle.
+   Left  ribbon: sq_local(+19,  0) → card(13,13) ✓
+   Right ribbon: sq_local(  0,+19) → card(card_w-13, 13) ✓  */
+.v-ribbon.left .v-ribbon-letter {
+  position: absolute;
+  top: 50%;
+  left: 85%;
+  transform: translate(-50%, -50%) rotate(-45deg);
+}
+.v-ribbon.right .v-ribbon-letter {
+  position: absolute;
+  top: 85%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-45deg);
+}
+.v-ribbon-letter {
+  color: #fff;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+.employee-card:hover .v-ribbon-letter {
+  opacity: 1;
 }

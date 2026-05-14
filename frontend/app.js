@@ -90,6 +90,7 @@ function renderCards(employees) {
       : 'https://ui-avatars.com/api/?name=' + encodeURIComponent(emp.name) + '&background=e94560&color=fff&size=128';
 
     const borderColor = getStatusColor(emp);
+    card.style.setProperty('--status-color', borderColor);
 
     card.innerHTML = `
       <div class="card-photo-wrapper">

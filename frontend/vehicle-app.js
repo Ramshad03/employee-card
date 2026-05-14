@@ -112,14 +112,8 @@ function renderVehicleCards(vehicles) {
     const insuranceColor = v.insuranceExpiry ? getExpiryStatus(v.insuranceExpiry)?.color : null;
 
     const bookmarkHTML = `
-      ${mulkiyaColor ? `
-        <div style="position:absolute; top:18px; left:-30px; width:100px; height:22px; background:${mulkiyaColor}; opacity:0.8; transform:rotate(-45deg); z-index:2; display:flex; align-items:center; justify-content:center;">
-          <span style="color:#fff; font-size:10px; font-weight:700; letter-spacing:1px;">M</span>
-        </div>` : ''}
-      ${insuranceColor ? `
-        <div style="position:absolute; top:18px; right:-30px; width:100px; height:22px; background:${insuranceColor}; opacity:0.8; transform:rotate(45deg); z-index:2; display:flex; align-items:center; justify-content:center;">
-          <span style="color:#fff; font-size:10px; font-weight:700; letter-spacing:1px;">I</span>
-        </div>` : ''}
+      ${mulkiyaColor   ? `<div class="v-ribbon left"  style="--r-color:${mulkiyaColor};"><span class="v-ribbon-letter">M</span></div>` : ''}
+      ${insuranceColor ? `<div class="v-ribbon right" style="--r-color:${insuranceColor};"><span class="v-ribbon-letter">I</span></div>` : ''}
     `;
 
     const photoHTML = v.photo
@@ -127,7 +121,7 @@ function renderVehicleCards(vehicles) {
       : `<div style="width:100%; height:110px; border-radius:8px; background:${statusColor}; display:flex; align-items:center; justify-content:center; font-size:48px;">🚗</div>`;
 
     return `
-      <div class="employee-card" onclick="window.location.href='vehicle-detail.html?id=${v.id}'" style="cursor:pointer; overflow:hidden; position:relative;">
+      <div class="employee-card vehicle-card" onclick="window.location.href='vehicle-detail.html?id=${v.id}'" style="cursor:pointer; position:relative; --status-color:${statusColor};">
         ${bookmarkHTML}
         <div class="card-photo" style="position:relative;">
           ${photoHTML}

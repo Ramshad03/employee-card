@@ -42,19 +42,21 @@
         <span class="nav-separator">|</span>
         <a href="vehicles.html" class="active">Vehicle</a>
       </li>
-      <li id="notifWrapper">
-        <button class="notif-btn" onclick="toggleNotifPanel()" title="Notifications">
-          🔔
-          <span class="notif-badge" id="notifBadge" style="display:none;">0</span>
-        </button>
-        <div class="notif-panel" id="notifPanel">
-          <div class="notif-header">Notifications</div>
-          <div class="notif-list" id="notifList">
-            <div class="notif-empty">Loading...</div>
+      <li class="nav-btn-group">
+        <div id="notifWrapper">
+          <button class="notif-btn" onclick="toggleNotifPanel()" title="Notifications">
+            🔔
+            <span class="notif-badge" id="notifBadge" style="display:none;">0</span>
+          </button>
+          <div class="notif-panel" id="notifPanel">
+            <div class="notif-header">Notifications</div>
+            <div class="notif-list" id="notifList">
+              <div class="notif-empty">Loading...</div>
+            </div>
           </div>
         </div>
+        <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">🌙 Dark</button>
       </li>
-      <li><button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">🌙 Dark</button></li>
     </ul>
   </nav>
 
@@ -332,14 +334,8 @@
 
       // Bookmark
       const bookmarkHTML = `
-        ${mulkiyaStatus ? `
-          <div style="position:absolute; top:18px; left:-30px; width:100px; height:22px; background:${mulkiyaStatus.color}; opacity:0.8; transform:rotate(-45deg); z-index:2; display:flex; align-items:center; justify-content:center;">
-            <span style="color:#fff; font-size:10px; font-weight:700; letter-spacing:1px;">M</span>
-          </div>` : ''}
-        ${insuranceStatus ? `
-          <div style="position:absolute; top:18px; right:-30px; width:100px; height:22px; background:${insuranceStatus.color}; opacity:0.8; transform:rotate(45deg); z-index:2; display:flex; align-items:center; justify-content:center;">
-            <span style="color:#fff; font-size:10px; font-weight:700; letter-spacing:1px;">I</span>
-          </div>` : ''}
+        ${mulkiyaStatus   ? `<div class="v-ribbon left"  style="--r-color:${mulkiyaStatus.color};"><span class="v-ribbon-letter">M</span></div>` : ''}
+        ${insuranceStatus ? `<div class="v-ribbon right" style="--r-color:${insuranceStatus.color};"><span class="v-ribbon-letter">I</span></div>` : ''}
       `;
 
       let fieldsHTML = '';
