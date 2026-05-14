@@ -85,13 +85,50 @@
           <input type="text" id="empPhone" placeholder="Enter phone number" />
         </div>
         <div class="form-group">
+          <label>Residence Card Number</label>
+          <input type="text" id="empResidenceCardNumber" placeholder="Enter residence card number" />
+        </div>
+        <div class="form-group">
+          <label>Residence Card Document (PDF/Image)</label>
+          <input type="file" id="empResidenceCardDoc" accept="image/*,.pdf" />
+        </div>
+        <input type="hidden" id="existingResidenceCardDoc" />
+        <div class="form-group">
+          <label>Offer Letter Document (PDF/Image)</label>
+          <input type="file" id="empOfferLetterDoc" accept="image/*,.pdf" />
+        </div>
+        <input type="hidden" id="existingOfferLetterDoc" />
+        <div class="form-group">
           <label>Role</label>
           <input type="text" id="empRole" placeholder="Enter role" />
+        </div>
+        <div class="form-group">
+          <label>Salary</label>
+          <div class="salary-input-row">
+            <select id="empSalaryCurrency" class="salary-currency-select">
+              <option value="">Currency</option>
+              <option value="$">United States ($)</option>
+              <option value="€">European Union (€)</option>
+              <option value="OMR">Oman (OMR)</option>
+              <option value="AED">United Arab Emirates (AED)</option>
+              <option value="₹">India (₹)</option>
+            </select>
+            <input type="number" id="empSalaryAmount" class="salary-amount-input" placeholder="Amount" min="0" />
+          </div>
         </div>
         <div class="form-group">
           <label>Join Date</label>
           <input type="date" id="empJoinDate" />
         </div>
+        <div class="form-group">
+          <label>ID Card Number</label>
+          <input type="text" id="empIdCardNumber" placeholder="Enter ID card number" />
+        </div>
+        <div class="form-group">
+          <label>ID Card Photo</label>
+          <input type="file" id="empIdCardPhoto" accept="image/*" />
+        </div>
+        <input type="hidden" id="existingIdCardPhoto" />
         <div class="form-group">
           <label>Gender</label>
           <select id="empGender">
@@ -117,6 +154,15 @@
           <label>Annual Leave Days</label>
           <input type="number" id="empLeaveDays" placeholder="e.g. 60" min="1" required />
         </div>
+        <div class="form-group">
+          <label>Driver's License Number</label>
+          <input type="text" id="empDriverLicenseNumber" placeholder="Enter driver's license number" />
+        </div>
+        <div class="form-group">
+          <label>Driver's License Document (PDF/Image)</label>
+          <input type="file" id="empDriverLicenseDoc" accept="image/*,.pdf" />
+        </div>
+        <input type="hidden" id="existingDriverLicenseDoc" />
         <div class="form-group">
           <label>Grant Leave From</label>
           <input type="date" id="empLeaveGrantedDate" />

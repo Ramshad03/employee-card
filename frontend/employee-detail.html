@@ -68,13 +68,50 @@
           <input type="text" id="empPhone" placeholder="Enter phone number" />
         </div>
         <div class="form-group">
-          <label>Role</label> 
+          <label>Residence Card Number</label>
+          <input type="text" id="empResidenceCardNumber" placeholder="Enter residence card number" />
+        </div>
+        <div class="form-group">
+          <label>Residence Card Document (PDF/Image)</label>
+          <input type="file" id="empResidenceCardDoc" accept="image/*,.pdf" />
+        </div>
+        <input type="hidden" id="existingResidenceCardDoc" />
+        <div class="form-group">
+          <label>Offer Letter Document (PDF/Image)</label>
+          <input type="file" id="empOfferLetterDoc" accept="image/*,.pdf" />
+        </div>
+        <input type="hidden" id="existingOfferLetterDoc" />
+        <div class="form-group">
+          <label>Role</label>
           <input type="text" id="empRole" placeholder="Enter Role" />
+        </div>
+        <div class="form-group">
+          <label>Salary</label>
+          <div class="salary-input-row">
+            <select id="empSalaryCurrency" class="salary-currency-select">
+              <option value="">Currency</option>
+              <option value="$">United States ($)</option>
+              <option value="€">European Union (€)</option>
+              <option value="OMR">Oman (OMR)</option>
+              <option value="AED">United Arab Emirates (AED)</option>
+              <option value="₹">India (₹)</option>
+            </select>
+            <input type="number" id="empSalaryAmount" class="salary-amount-input" placeholder="Amount" min="0" />
+          </div>
         </div>
         <div class="form-group">
           <label>Join Date</label>
           <input type="date" id="empJoinDate" />
         </div>
+        <div class="form-group">
+          <label>ID Card Number</label>
+          <input type="text" id="empIdCardNumber" placeholder="Enter ID card number" />
+        </div>
+        <div class="form-group">
+          <label>ID Card Photo</label>
+          <input type="file" id="empIdCardPhoto" accept="image/*" />
+        </div>
+        <input type="hidden" id="existingIdCardPhoto" />
         <div class="form-group">
           <label>Gender</label>
           <select id="empGender">
@@ -99,6 +136,15 @@
           <label>Annual Leave Days</label>
           <input type="number" id="empLeaveDays" placeholder="e.g. 60" min="1" required />
         </div>
+        <div class="form-group">
+          <label>Driver's License Number</label>
+          <input type="text" id="empDriverLicenseNumber" placeholder="Enter driver's license number" />
+        </div>
+        <div class="form-group">
+          <label>Driver's License Document (PDF/Image)</label>
+          <input type="file" id="empDriverLicenseDoc" accept="image/*,.pdf" />
+        </div>
+        <input type="hidden" id="existingDriverLicenseDoc" />
         <div class="form-group">
           <label>Grant Leave From</label>
           <input type="date" id="empLeaveGrantedDate" />
@@ -368,9 +414,74 @@
 
       let fieldsHTML = '';
       if (emp.department) fieldsHTML += detailRow('Role', emp.role);
+      if (emp.salaryAmount) fieldsHTML += detailRow('Salary', `${emp.salaryCurrency || ''} ${Number(emp.salaryAmount).toLocaleString()}`);
       if (emp.email)      fieldsHTML += detailRow('Email', emp.email);
       if (emp.phone)      fieldsHTML += detailRow('Phone', emp.phone);
+
+      fieldsHTML += `
+        <div class="detail-row" style="cursor:pointer;" onclick="toggleResidenceCardDoc()">
+          <span class="detail-label" style="display:flex; align-items:center; gap:8px;">
+            Residence Card
+            <span id="residenceCardArrow" style="width:22px; height:22px; border-radius:50%; border:1.5px solid #ccc; display:inline-flex; align-items:center; justify-content:center; font-size:10px; transition:transform 0.3s;">▼</span>
+          </span>
+          <span class="detail-value">${emp.residenceCardNumber || '—'}</span>
+        </div>
+        <div id="residenceCardDropdown" style="display:none; background:#f4f6f8; border-radius:10px; padding:14px 16px; margin:4px 0 8px 0;">
+          ${emp.residenceCardDoc ? `
+            <p style="font-weight:600; color:#444; margin:0 0 8px 0; font-size:14px;">Document</p>
+            ${emp.residenceCardDoc.startsWith('data:image') ? `
+              <img src="${emp.residenceCardDoc}" onclick="openResidenceCardDoc()"
+                style="width:100%; max-height:160px; object-fit:cover; border-radius:8px; cursor:pointer; border:1px solid #ddd;" />
+            ` : `
+              <div onclick="openResidenceCardDoc()"
+                style="display:flex; align-items:center; gap:10px; padding:14px; background:#fff; border:1px solid #ddd; border-radius:8px; cursor:pointer;">
+                <span style="font-size:28px;">📄</span>
+                <span style="color:#2980b9; font-weight:600;">View Document</span>
+              </div>
+            `}
+          ` : '<p style="color:#aaa; font-size:13px; margin:0;">No residence card document uploaded yet.</p>'}
+        </div>
+        <div class="detail-row" style="cursor:pointer;" onclick="toggleOfferLetterDoc()">
+          <span class="detail-label" style="display:flex; align-items:center; gap:8px;">
+            Offer Letter
+            <span id="offerLetterArrow" style="width:22px; height:22px; border-radius:50%; border:1.5px solid #ccc; display:inline-flex; align-items:center; justify-content:center; font-size:10px; transition:transform 0.3s;">▼</span>
+          </span>
+          <span class="detail-value"></span>
+        </div>
+        <div id="offerLetterDropdown" style="display:none; background:#f4f6f8; border-radius:10px; padding:14px 16px; margin:4px 0 8px 0;">
+          ${emp.offerLetterDoc ? `
+            <p style="font-weight:600; color:#444; margin:0 0 8px 0; font-size:14px;">Document</p>
+            ${emp.offerLetterDoc.startsWith('data:image') ? `
+              <img src="${emp.offerLetterDoc}" onclick="openOfferLetterDoc()"
+                style="width:100%; max-height:160px; object-fit:cover; border-radius:8px; cursor:pointer; border:1px solid #ddd;" />
+            ` : `
+              <div onclick="openOfferLetterDoc()"
+                style="display:flex; align-items:center; gap:10px; padding:14px; background:#fff; border:1px solid #ddd; border-radius:8px; cursor:pointer;">
+                <span style="font-size:28px;">📄</span>
+                <span style="color:#2980b9; font-weight:600;">View Document</span>
+              </div>
+            `}
+          ` : '<p style="color:#aaa; font-size:13px; margin:0;">No offer letter uploaded yet.</p>'}
+        </div>`;
+
       if (emp.joinDate)   fieldsHTML += detailRow('Join Date', new Date(emp.joinDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }));
+
+      fieldsHTML += `
+        <div class="detail-row" style="cursor:pointer;" onclick="toggleIdCardDoc()">
+          <span class="detail-label" style="display:flex; align-items:center; gap:8px;">
+            ID Card
+            <span id="idCardArrow" style="width:22px; height:22px; border-radius:50%; border:1.5px solid #ccc; display:inline-flex; align-items:center; justify-content:center; font-size:10px; transition:transform 0.3s;">▼</span>
+          </span>
+          <span class="detail-value">${emp.idCardNumber || '—'}</span>
+        </div>
+        <div id="idCardDropdown" style="display:none; background:#f4f6f8; border-radius:10px; padding:14px 16px; margin:4px 0 8px 0;">
+          ${emp.idCardPhoto ? `
+            <p style="font-weight:600; color:#444; margin:0 0 8px 0; font-size:14px;">ID Card Photo</p>
+            <img src="${emp.idCardPhoto}" onclick="openIdCardPhoto()"
+              style="width:100%; max-height:160px; object-fit:cover; border-radius:8px; cursor:pointer; border:1px solid #ddd;" />
+          ` : '<p style="color:#aaa; font-size:13px; margin:0;">No ID card photo uploaded yet.</p>'}
+        </div>`;
+
       if (emp.gender)     fieldsHTML += detailRow('Gender', emp.gender);
       if (emp.maritalStatus) {
         fieldsHTML += `
@@ -425,6 +536,30 @@
         </div>`;
 
       if (emp.leaveDays)  fieldsHTML += detailRow('Annual Leave', `${emp.leaveDays} days`);
+
+      fieldsHTML += `
+        <div class="detail-row" style="cursor:pointer;" onclick="toggleDriverLicenseDoc()">
+          <span class="detail-label" style="display:flex; align-items:center; gap:8px;">
+            Driver's License
+            <span id="driverLicenseArrow" style="width:22px; height:22px; border-radius:50%; border:1.5px solid #ccc; display:inline-flex; align-items:center; justify-content:center; font-size:10px; transition:transform 0.3s;">▼</span>
+          </span>
+          <span class="detail-value">${emp.driverLicenseNumber || '—'}</span>
+        </div>
+        <div id="driverLicenseDropdown" style="display:none; background:#f4f6f8; border-radius:10px; padding:14px 16px; margin:4px 0 8px 0;">
+          ${emp.driverLicenseDoc ? `
+            <p style="font-weight:600; color:#444; margin:0 0 8px 0; font-size:14px;">Document</p>
+            ${emp.driverLicenseDoc.startsWith('data:image') ? `
+              <img src="${emp.driverLicenseDoc}" onclick="openDriverLicenseDoc('image')"
+                style="width:100%; max-height:160px; object-fit:cover; border-radius:8px; cursor:pointer; border:1px solid #ddd;" />
+            ` : `
+              <div onclick="openDriverLicenseDoc('pdf')"
+                style="display:flex; align-items:center; gap:10px; padding:14px; background:#fff; border:1px solid #ddd; border-radius:8px; cursor:pointer;">
+                <span style="font-size:28px;">📄</span>
+                <span style="color:#2980b9; font-weight:600;">View Document</span>
+              </div>
+            `}
+          ` : '<p style="color:#aaa; font-size:13px; margin:0;">No driver\'s license document uploaded yet.</p>'}
+        </div>`;
 
       // Auto-detect assigned vehicle
       try {
@@ -546,16 +681,25 @@
       document.getElementById('empEmployeeId').value = emp.employeeId || '';
       document.getElementById('empName').value = emp.name || '';
       document.getElementById('empRole').value = emp.role || '';
+      document.getElementById('empSalaryCurrency').value = emp.salaryCurrency || '';
+      document.getElementById('empSalaryAmount').value = emp.salaryAmount || '';
       document.getElementById('empEmail').value = emp.email || '';
       document.getElementById('empPhone').value = emp.phone || '';
+      document.getElementById('empResidenceCardNumber').value = emp.residenceCardNumber || '';
+      document.getElementById('existingResidenceCardDoc').value = emp.residenceCardDoc || '';
+      document.getElementById('existingOfferLetterDoc').value = emp.offerLetterDoc || '';
       document.getElementById('empDepartment').value = emp.department || '';
       document.getElementById('empJoinDate').value = emp.joinDate || '';
+      document.getElementById('empIdCardNumber').value = emp.idCardNumber || '';
+      document.getElementById('existingIdCardPhoto').value = emp.idCardPhoto || '';
       document.getElementById('empGender').value = emp.gender || '';
       document.getElementById('empMaritalStatus').value = emp.maritalStatus || '';
       toggleFamilyDoc(emp.maritalStatus || '');
       const familyDocEl = document.getElementById('existingFamilyDoc');
       if (familyDocEl) familyDocEl.value = emp.familyDoc || '';
       document.getElementById('empLeaveDays').value = emp.leaveDays || '';
+      document.getElementById('empDriverLicenseNumber').value = emp.driverLicenseNumber || '';
+      document.getElementById('existingDriverLicenseDoc').value = emp.driverLicenseDoc || '';
       document.getElementById('empLeaveGrantedDate').value = emp.leaveGrantedDate || '';
       document.getElementById('empExtendLeaveUntil').value = emp.extendLeaveUntil || '';
       document.getElementById('existingVisaDoc').value = emp.visaDoc || '';
@@ -758,10 +902,74 @@
           });
         }
 
+        // Handle Residence Card document upload
+        let residenceCardDocUrl = document.getElementById('existingResidenceCardDoc').value || '';
+        const residenceCardDocFile = document.getElementById('empResidenceCardDoc');
+        if (residenceCardDocFile && residenceCardDocFile.files && residenceCardDocFile.files[0]) {
+          const file = residenceCardDocFile.files[0];
+          if (file.size > 5 * 1024 * 1024) { alert('⚠️ Residence card document too large. Max 5MB.'); return; }
+          residenceCardDocUrl = await new Promise((resolve, reject) => {
+            const r = new FileReader();
+            r.onload = () => resolve(r.result);
+            r.onerror = () => reject(new Error('Failed to read file'));
+            r.readAsDataURL(file);
+          });
+        }
+
+        // Handle Offer Letter document upload
+        let offerLetterDocUrl = document.getElementById('existingOfferLetterDoc').value || '';
+        const offerLetterDocFile = document.getElementById('empOfferLetterDoc');
+        if (offerLetterDocFile && offerLetterDocFile.files && offerLetterDocFile.files[0]) {
+          const file = offerLetterDocFile.files[0];
+          if (file.size > 5 * 1024 * 1024) { alert('⚠️ Offer letter document too large. Max 5MB.'); return; }
+          offerLetterDocUrl = await new Promise((resolve, reject) => {
+            const r = new FileReader();
+            r.onload = () => resolve(r.result);
+            r.onerror = () => reject(new Error('Failed to read file'));
+            r.readAsDataURL(file);
+          });
+        }
+
+        // Handle Driver's License document upload
+        let driverLicenseDocUrl = document.getElementById('existingDriverLicenseDoc').value || '';
+        const driverLicenseDocFile = document.getElementById('empDriverLicenseDoc');
+        if (driverLicenseDocFile && driverLicenseDocFile.files && driverLicenseDocFile.files[0]) {
+          const file = driverLicenseDocFile.files[0];
+          if (file.size > 5 * 1024 * 1024) {
+            alert('⚠️ Driver\'s license document too large. Max 5MB.');
+            return;
+          }
+          driverLicenseDocUrl = await new Promise((resolve, reject) => {
+            const r = new FileReader();
+            r.onload = () => resolve(r.result);
+            r.onerror = () => reject(new Error('Failed to read file'));
+            r.readAsDataURL(file);
+          });
+        }
+
+        // Handle ID Card photo upload
+        let idCardPhotoUrl = document.getElementById('existingIdCardPhoto').value || '';
+        const idCardPhotoFile = document.getElementById('empIdCardPhoto');
+        if (idCardPhotoFile && idCardPhotoFile.files && idCardPhotoFile.files[0]) {
+          const file = idCardPhotoFile.files[0];
+          if (file.size > 5 * 1024 * 1024) {
+            alert('⚠️ ID card photo too large. Max 5MB.');
+            return;
+          }
+          idCardPhotoUrl = await new Promise((resolve, reject) => {
+            const r = new FileReader();
+            r.onload = () => resolve(r.result);
+            r.onerror = () => reject(new Error('Failed to read file'));
+            r.readAsDataURL(file);
+          });
+        }
+
         const employeeData = {
           employeeId: document.getElementById('empEmployeeId').value,
           name: document.getElementById('empName').value,
           role: document.getElementById('empRole').value,
+          salaryCurrency: document.getElementById('empSalaryCurrency').value || '',
+          salaryAmount: document.getElementById('empSalaryAmount').value || '',
           email: document.getElementById('empEmail').value,
           phone: document.getElementById('empPhone').value,
           department: document.getElementById('empDepartment').value,
@@ -774,6 +982,13 @@
           extendLeaveUntil: document.getElementById('empExtendLeaveUntil').value || null,
           visaDate: document.getElementById('empVisaDate').value || null,
           visaDoc: visaDocUrl,
+          idCardNumber: document.getElementById('empIdCardNumber').value || '',
+          idCardPhoto: idCardPhotoUrl,
+          residenceCardNumber: document.getElementById('empResidenceCardNumber').value || '',
+          residenceCardDoc: residenceCardDocUrl,
+          offerLetterDoc: offerLetterDocUrl,
+          driverLicenseNumber: document.getElementById('empDriverLicenseNumber').value || '',
+          driverLicenseDoc: driverLicenseDocUrl,
           customFields: getCustomFields(),
         };
 
@@ -795,6 +1010,78 @@
 
       if (empId) loadEmployee();
     });
+
+    function toggleResidenceCardDoc() {
+      const dropdown = document.getElementById('residenceCardDropdown');
+      const arrow = document.getElementById('residenceCardArrow');
+      if (!dropdown) return;
+      if (dropdown.style.display === 'none' || dropdown.style.display === '') {
+        dropdown.style.display = 'block';
+        arrow.style.transform = 'rotate(180deg)';
+      } else {
+        dropdown.style.display = 'none';
+        arrow.style.transform = 'rotate(0deg)';
+      }
+    }
+    function openResidenceCardDoc() {
+      const doc = currentEmployee && currentEmployee.residenceCardDoc;
+      if (doc) window.open(doc, '_blank');
+    }
+
+    function toggleOfferLetterDoc() {
+      const dropdown = document.getElementById('offerLetterDropdown');
+      const arrow = document.getElementById('offerLetterArrow');
+      if (!dropdown) return;
+      if (dropdown.style.display === 'none' || dropdown.style.display === '') {
+        dropdown.style.display = 'block';
+        arrow.style.transform = 'rotate(180deg)';
+      } else {
+        dropdown.style.display = 'none';
+        arrow.style.transform = 'rotate(0deg)';
+      }
+    }
+    function openOfferLetterDoc() {
+      const doc = currentEmployee && currentEmployee.offerLetterDoc;
+      if (doc) window.open(doc, '_blank');
+    }
+
+    function toggleDriverLicenseDoc() {
+      const dropdown = document.getElementById('driverLicenseDropdown');
+      const arrow = document.getElementById('driverLicenseArrow');
+      if (!dropdown) return;
+      if (dropdown.style.display === 'none' || dropdown.style.display === '') {
+        dropdown.style.display = 'block';
+        arrow.style.transform = 'rotate(180deg)';
+      } else {
+        dropdown.style.display = 'none';
+        arrow.style.transform = 'rotate(0deg)';
+      }
+    }
+
+    function openDriverLicenseDoc(type) {
+      const doc = currentEmployee && currentEmployee.driverLicenseDoc;
+      if (!doc) return;
+      window.open(doc, '_blank');
+    }
+
+    function toggleIdCardDoc() {
+      const dropdown = document.getElementById('idCardDropdown');
+      const arrow = document.getElementById('idCardArrow');
+      if (!dropdown) return;
+      if (dropdown.style.display === 'none' || dropdown.style.display === '') {
+        dropdown.style.display = 'block';
+        arrow.style.transform = 'rotate(180deg)';
+      } else {
+        dropdown.style.display = 'none';
+        arrow.style.transform = 'rotate(0deg)';
+      }
+    }
+
+    function openIdCardPhoto() {
+      const photo = currentEmployee && currentEmployee.idCardPhoto;
+      if (!photo) return;
+      window.open(photo, '_blank');
+    }
 
     function toggleVisaDoc() {
       const dropdown = document.getElementById('visaDropdown');

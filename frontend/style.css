@@ -743,6 +743,19 @@ body.dark-theme .search-filter-btn:hover {
   border-color: #e94560;
 }
 
+/* ===== SALARY FIELD ===== */
+.salary-input-row {
+  display: flex;
+  gap: 8px;
+}
+.salary-currency-select {
+  width: auto !important;
+  flex-shrink: 0;
+}
+.salary-amount-input {
+  flex: 1;
+}
+
 .modal-actions {
   display: flex;
   gap: 12px;

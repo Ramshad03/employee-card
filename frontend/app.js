@@ -62,11 +62,15 @@ function applyEmployeeFilters() {
   const searchInput = document.getElementById('searchInput');
   const query = searchInput ? searchInput.value.toLowerCase() : '';
   const filtered = allEmployees.filter(emp => {
-    const matchesSearch =
-      (emp.name || '').toLowerCase().includes(query) ||
-      (emp.employeeId || '').toLowerCase().includes(query) ||
-      (emp.role || '').toLowerCase().includes(query) ||
-      (emp.department || '').toLowerCase().includes(query);
+    const customFieldText = (emp.customFields || []).map(cf => `${cf.label} ${cf.value}`).join(' ');
+    const matchesSearch = !query || [
+      emp.name, emp.employeeId, emp.role, emp.department,
+      emp.phone, emp.email, emp.gender, emp.maritalStatus,
+      emp.idCardNumber, emp.residenceCardNumber, emp.driverLicenseNumber,
+      emp.salaryCurrency, emp.salaryAmount,
+      emp.visaDate, emp.joinDate,
+      customFieldText
+    ].some(val => (val || '').toString().toLowerCase().includes(query));
     return matchesSearch && employeeMatchesFilter(emp);
   });
   renderCards(filtered);
@@ -316,10 +320,19 @@ function openEditModal(id) {
   document.getElementById('empEmployeeId').value = emp.employeeId || '';
   document.getElementById('empName').value = emp.name || '';
   document.getElementById('empRole').value = emp.role || '';
+  document.getElementById('empSalaryCurrency').value = emp.salaryCurrency || '';
+  document.getElementById('empSalaryAmount').value = emp.salaryAmount || '';
   document.getElementById('empEmail').value = emp.email || '';
   document.getElementById('empPhone').value = emp.phone || '';
   document.getElementById('empDepartment').value = emp.department || '';
   document.getElementById('empJoinDate').value = emp.joinDate || '';
+  document.getElementById('empResidenceCardNumber').value = emp.residenceCardNumber || '';
+  document.getElementById('existingResidenceCardDoc').value = emp.residenceCardDoc || '';
+  document.getElementById('existingOfferLetterDoc').value = emp.offerLetterDoc || '';
+  document.getElementById('empIdCardNumber').value = emp.idCardNumber || '';
+  document.getElementById('existingIdCardPhoto').value = emp.idCardPhoto || '';
+  document.getElementById('empDriverLicenseNumber').value = emp.driverLicenseNumber || '';
+  document.getElementById('existingDriverLicenseDoc').value = emp.driverLicenseDoc || '';
   document.getElementById('empGender').value = emp.gender || '';
   document.getElementById('empMaritalStatus').value = emp.maritalStatus || '';
   document.getElementById('empLeaveDays').value = emp.leaveDays || '';
@@ -384,10 +397,74 @@ function initForm() {
         croppedBlob = null;
       }
 
+      // Handle Residence Card document upload
+      let residenceCardDocUrl = document.getElementById('existingResidenceCardDoc').value || '';
+      const residenceCardDocFile = document.getElementById('empResidenceCardDoc');
+      if (residenceCardDocFile && residenceCardDocFile.files && residenceCardDocFile.files[0]) {
+        const file = residenceCardDocFile.files[0];
+        if (file.size > 5 * 1024 * 1024) { alert('⚠️ Residence card document too large. Max 5MB.'); return; }
+        residenceCardDocUrl = await new Promise((resolve, reject) => {
+          const r = new FileReader();
+          r.onload = () => resolve(r.result);
+          r.onerror = () => reject(new Error('Failed to read file'));
+          r.readAsDataURL(file);
+        });
+      }
+
+      // Handle Offer Letter document upload
+      let offerLetterDocUrl = document.getElementById('existingOfferLetterDoc').value || '';
+      const offerLetterDocFile = document.getElementById('empOfferLetterDoc');
+      if (offerLetterDocFile && offerLetterDocFile.files && offerLetterDocFile.files[0]) {
+        const file = offerLetterDocFile.files[0];
+        if (file.size > 5 * 1024 * 1024) { alert('⚠️ Offer letter document too large. Max 5MB.'); return; }
+        offerLetterDocUrl = await new Promise((resolve, reject) => {
+          const r = new FileReader();
+          r.onload = () => resolve(r.result);
+          r.onerror = () => reject(new Error('Failed to read file'));
+          r.readAsDataURL(file);
+        });
+      }
+
+      // Handle Driver's License document upload
+      let driverLicenseDocUrl = document.getElementById('existingDriverLicenseDoc').value || '';
+      const driverLicenseDocFile = document.getElementById('empDriverLicenseDoc');
+      if (driverLicenseDocFile && driverLicenseDocFile.files && driverLicenseDocFile.files[0]) {
+        const file = driverLicenseDocFile.files[0];
+        if (file.size > 5 * 1024 * 1024) {
+          alert('⚠️ Driver\'s license document too large. Max 5MB.');
+          return;
+        }
+        driverLicenseDocUrl = await new Promise((resolve, reject) => {
+          const r = new FileReader();
+          r.onload = () => resolve(r.result);
+          r.onerror = () => reject(new Error('Failed to read file'));
+          r.readAsDataURL(file);
+        });
+      }
+
+      // Handle ID Card photo upload
+      let idCardPhotoUrl = document.getElementById('existingIdCardPhoto').value || '';
+      const idCardPhotoFile = document.getElementById('empIdCardPhoto');
+      if (idCardPhotoFile && idCardPhotoFile.files && idCardPhotoFile.files[0]) {
+        const file = idCardPhotoFile.files[0];
+        if (file.size > 5 * 1024 * 1024) {
+          alert('⚠️ ID card photo too large. Max 5MB.');
+          return;
+        }
+        idCardPhotoUrl = await new Promise((resolve, reject) => {
+          const r = new FileReader();
+          r.onload = () => resolve(r.result);
+          r.onerror = () => reject(new Error('Failed to read file'));
+          r.readAsDataURL(file);
+        });
+      }
+
       const employeeData = {
         employeeId: document.getElementById('empEmployeeId').value,
         name: document.getElementById('empName').value,
         role: document.getElementById('empRole').value,
+        salaryCurrency: document.getElementById('empSalaryCurrency').value || '',
+        salaryAmount: document.getElementById('empSalaryAmount').value || '',
         email: document.getElementById('empEmail').value,
         phone: document.getElementById('empPhone').value,
         department: document.getElementById('empDepartment').value,
@@ -397,6 +474,13 @@ function initForm() {
         leaveDays: parseInt(document.getElementById('empLeaveDays').value) || 0,
         leaveGrantedDate: document.getElementById('empLeaveGrantedDate').value || null,
         extendLeaveUntil: document.getElementById('empExtendLeaveUntil').value || null,
+        residenceCardNumber: document.getElementById('empResidenceCardNumber').value || '',
+        residenceCardDoc: residenceCardDocUrl,
+        offerLetterDoc: offerLetterDocUrl,
+        idCardNumber: document.getElementById('empIdCardNumber').value || '',
+        idCardPhoto: idCardPhotoUrl,
+        driverLicenseNumber: document.getElementById('empDriverLicenseNumber').value || '',
+        driverLicenseDoc: driverLicenseDocUrl,
         customFields: getCustomFields(),
       };
 

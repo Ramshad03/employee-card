@@ -55,11 +55,14 @@ function applyVehicleFilters() {
   const searchInput = document.getElementById('searchInput');
   const q = searchInput ? searchInput.value.toLowerCase() : '';
   const filtered = allVehicles.filter(v => {
-    const matchesSearch =
-      (v.name || '').toLowerCase().includes(q) ||
-      (v.vehicleId || '').toLowerCase().includes(q) ||
-      (v.plate || '').toLowerCase().includes(q) ||
-      (v.driver || '').toLowerCase().includes(q);
+    const customFieldText = (v.customFields || []).map(cf => `${cf.label} ${cf.value}`).join(' ');
+    const matchesSearch = !q || [
+      v.name, v.vehicleId, v.plate, v.driver, v.type, v.status,
+      v.mulkiyaNumber, v.mulkiyaIssueDate, v.mulkiyaExpiryDate,
+      v.insuranceProvider, v.insuranceStartDate, v.insuranceExpiry,
+      v.regDate,
+      customFieldText
+    ].some(val => (val || '').toString().toLowerCase().includes(q));
     return matchesSearch && vehicleMatchesFilter(v);
   });
   renderVehicleCards(filtered);
