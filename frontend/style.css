@@ -53,17 +53,23 @@ body { background: var(--bg) !important; color: var(--text-primary) !important; 
 .page-header { background: var(--bg) !important; }
 
 .theme-toggle {
-  background: none;
-  border: 1.5px solid rgba(255,255,255,0.3);
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(10px) saturate(160%);
+  -webkit-backdrop-filter: blur(10px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.28);
   border-radius: 20px;
   padding: 5px 14px;
   color: #fff;
   cursor: pointer;
   font-size: 13px;
-  transition: all 0.2s;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.2);
+  transition: all 0.22s ease;
   margin-left: 0;
 }
-.theme-toggle:hover { background: rgba(255,255,255,0.1); }
+.theme-toggle:hover {
+  background: rgba(255, 255, 255, 0.22);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.3);
+}
 
 /* ===== NOTIFICATIONS ===== */
 #notifWrapper {
@@ -72,20 +78,26 @@ body { background: var(--bg) !important; color: var(--text-primary) !important; 
 }
 
 .notif-btn {
-  background: none;
-  border: 1.5px solid rgba(255,255,255,0.3);
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(10px) saturate(160%);
+  -webkit-backdrop-filter: blur(10px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.28);
   border-radius: 20px;
   padding: 5px 14px;
   color: #fff;
   cursor: pointer;
   font-size: 13px;
   position: relative;
-  transition: all 0.2s;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.2);
+  transition: all 0.22s ease;
   display: flex;
   align-items: center;
   gap: 4px;
 }
-.notif-btn:hover { background: rgba(255,255,255,0.1); }
+.notif-btn:hover {
+  background: rgba(255, 255, 255, 0.22);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.3);
+}
 
 .notif-badge {
   position: absolute;
@@ -273,6 +285,59 @@ body {
   background-color: #c73652;
 }
 
+/* Glassmorphism variant — clean glass, neutral shadow on hover only */
+.btn-primary-glass {
+  background: linear-gradient(135deg,
+    rgba(233, 69, 96, 0.92) 0%,
+    rgba(210, 50, 78, 0.82) 100%) !important;
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.28) !important;
+  border-radius: 12px !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28) !important;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  transition: all 0.22s ease !important;
+}
+.btn-primary-glass:hover {
+  background: linear-gradient(135deg,
+    rgba(233, 69, 96, 1) 0%,
+    rgba(210, 50, 78, 0.95) 100%) !important;
+  box-shadow:
+    0 4px 14px rgba(0, 0, 0, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.38) !important;
+}
+
+/* ===== GLASS BUTTON (iOS glassmorphism) ===== */
+.glass-btn {
+  background: rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.28) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.35) !important;
+  color: #1a1a2e !important;
+  font-weight: 600;
+  transition: all 0.22s ease !important;
+}
+.glass-btn:hover {
+  background: rgba(255, 255, 255, 0.32) !important;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.14), inset 0 1px 0 rgba(255,255,255,0.45) !important;
+  border-color: rgba(255, 255, 255, 0.4) !important;
+}
+body.dark-theme .glass-btn {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border-color: rgba(255, 255, 255, 0.14) !important;
+  color: #f0f0f0 !important;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.1) !important;
+}
+body.dark-theme .glass-btn:hover {
+  background: rgba(255, 255, 255, 0.15) !important;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.15) !important;
+}
+
 .btn-secondary {
   background-color: #fff;
   color: #1a1a2e;
@@ -340,22 +405,35 @@ body {
 
 .search-filter-btn {
   position: absolute;
-  top: 4px;
-  right: 4px;
-  bottom: 4px;
-  border: 0;
-  border-left: 1px solid #ddd;
-  border-radius: 0 6px 6px 0;
-  background: #f4f6f8;
+  top: 5px;
+  right: 5px;
+  bottom: 5px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(10px) saturate(160%);
+  -webkit-backdrop-filter: blur(10px) saturate(160%);
   color: #1a1a2e;
-  font-size: 0.78rem;
+  font-size: 0.75rem;
   font-weight: 700;
-  padding: 0 12px;
+  padding: 0 10px;
   cursor: pointer;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.4);
+  transition: all 0.22s ease;
 }
 
 .search-filter-btn:hover {
-  background: #eceff3;
+  background: rgba(255, 255, 255, 0.32);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.5);
+}
+
+body.dark-theme .search-filter-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.14);
+  color: #f0f0f0;
+}
+body.dark-theme .search-filter-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
 }
 
 .search-filter-menu {
@@ -1168,7 +1246,6 @@ body.dark-theme #notifDropdown [style*="border-bottom:1px solid #eee"] {
   background: transparent;
   box-shadow:
   /*Emp glow density*/
-    0 0 0 1px  color-mix(in srgb, var(--status-color) 35%, transparent),
     0 0 10px 3px  color-mix(in srgb, var(--status-color) 25%, transparent),
     0 0 24px 6px  color-mix(in srgb, var(--status-color) 15%, transparent);
   opacity: 0;
@@ -1238,10 +1315,6 @@ body.dark-theme #notifDropdown [style*="border-bottom:1px solid #eee"] {
   font-weight: 900;
   letter-spacing: 1px;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
-  opacity: 0;
-  transition: opacity 0.25s ease;
-}
-.employee-card:hover .v-ribbon-letter {
   opacity: 1;
 }
 
